@@ -1,37 +1,12 @@
-#include <phool/PHRandomSeed.h>
-#include <fun4all/SubsysReco.h>
-#include <fun4all/Fun4AllServer.h>
-#include <fun4all/Fun4AllInputManager.h>
-#include <fun4all/Fun4AllDummyInputManager.h>
-#include <fun4all/Fun4AllOutputManager.h>
-#include <fun4all/Fun4AllDstInputManager.h>
-#include <fun4all/Fun4AllNoSyncDstInputManager.h>
-#include <fun4all/Fun4AllDstOutputManager.h>
-#include <g4main/PHG4ParticleGeneratorBase.h>
-#include <g4main/PHG4ParticleGenerator.h>
-#include <g4main/PHG4SimpleEventGenerator.h>
-#include <g4main/PHG4ParticleGeneratorVectorMeson.h>
-#include <g4main/PHG4ParticleGun.h>
-#include <g4main/HepMCNodeReader.h>
-#include <g4detectors/PHG4DetectorSubsystem.h>
-#include <phool/recoConsts.h>
-#include <phpythia6/PHPythia6.h>
-#include <phpythia8/PHPythia8.h>
-#include <phhepmc/Fun4AllHepMCPileupInputManager.h>
-#include <phhepmc/Fun4AllHepMCInputManager.h>
-#include <phpythia8/PHPy8ParticleTrigger.h>
-#include "G4Setup_sPHENIX.C"
-#include "G4_Bbc.C"
-#include "G4_Global.C"
-#include "G4_CaloTrigger.C"
-#include "G4_Jets.C"
-#include "G4_HIJetReco.C"
-#include "G4_TopoClusterReco.C"
-#include "G4_ParticleFlow.C"
-#include "G4_DSTReader.C"
-#include "DisplayOn.C"
-#include "TLorentzVector.h"
-#include "TVector3.h"
+
+#include <Pythia8/Pythia.h>
+	R__LOAD_LIBRARY(libPHPythia8.so)
+	R__LOAD_LIBRARY(EvtGen/lib/libEvtGenExternal.so)
+	R__LOAD_LIBRARY(EvtGen/lib/libEvtGen.so)
+	
+
+
+
 
 #include <iostream>
 #include <fstream>
@@ -48,8 +23,6 @@
 #include "TF1.h"
 #include "TString.h"
 #include "TClonesArray.h"
-#include "TPythia6.h"
-#include "TPythia6Decayer.h"
 #include "TRandom3.h"
 #include "TParticle.h"
 #include "TLorentzVector.h"
@@ -64,24 +37,49 @@
 #include "TTree.h"
 #include "TLegend.h"
 #include "TCanvas.h"
-#include "g4main/PHG4SimpleEventGenerator.h"
+#include <TStyle.h>
+#include <TROOT.h>
 
 
+//Event Gen//
+#include "EvtGen/include/EvtGen/EvtGen.hh"
+#include "EvtGen/include/EvtGenBase/EvtParticle.hh"
+#include "EvtGen/include/EvtGenBase/EvtParticleFactory.hh"
+#include "EvtGen/include/EvtGenBase/EvtPatches.hh"
+#include "EvtGen/include/EvtGenBase/EvtPDL.hh"
+#include "EvtGen/include/EvtGenBase/EvtRandom.hh"
+#include "EvtGen/include/EvtGenBase/EvtReport.hh"
+#include "EvtGen/include/EvtGenBase/EvtHepMCEvent.hh"
+#include "EvtGen/include/EvtGenBase/EvtSimpleRandomEngine.hh"
+#include "EvtGen/include/EvtGenBase/EvtAbsRadCorr.hh"
+#include "EvtGen/include/EvtGenBase/EvtDecayBase.hh"
+#include "EvtGen/include/EvtGenExternal/EvtExternalGenList.hh"
 
-	R__LOAD_LIBRARY(libfun4all.so)
-	R__LOAD_LIBRARY(libg4testbench.so)
-	R__LOAD_LIBRARY(libphhepmc.so)
-	R__LOAD_LIBRARY(libPHPythia6.so)
-R__LOAD_LIBRARY(libPHPythia8.so)
+#include "PHEvtGenDecayer.h"
+#include "PHEvtGenDecayer.cxx"
+
 
 
 	//#include <hfmltrigger/HFMLTriggerHepMCTrigger.h>
 	//R__LOAD_LIBRARY(libHFMLTrigger.so)
 	using namespace std;
 
+	bool RunBackground = false;
+	bool RunSignal = false;
+	bool RunEVTGEN = true;
 
-	int NEvents = 9900;
-	
+	//PHPythia8 *pythia8 = NULL;
+
+
+
+	//StarPythia8 *pythia8 = NULL;
+	PHEvtGenDecayer* myEvtGenDecayer = NULL;
+
+	double TrackPTMin = 0;
+	double TrackPTMax = 20;
+
+	int NEvents = 4;
+
 	bool UseSTAR = true;
 
 	double PhiMass = 1.019461;
@@ -89,8 +87,6 @@ R__LOAD_LIBRARY(libPHPythia8.so)
 	double KKMassWindow = 0.10;
 	double PiKKMassWindow = 0.10;
 
-	bool RunBackground = true;
-	bool RunSignal = true;
 	double minPtCut = 0.0;
 	double etaCut = 1.1;
 
@@ -102,7 +98,7 @@ R__LOAD_LIBRARY(libPHPythia8.so)
 	bool mUseTree = true;
 
 	const Int_t nPtBinsDca = 17;
-	const Double_t ptEdgeDca[nPtBinsDca + 1] = {0 ,  0.4 , 0.5 , 0.6 , 0.7,  0.8 , 0.9 , 1.0 , 1.2 , 1.4 , 1.6 , 1.8 , 2. , 2.4 , 3.0 , 4. , 6., 50. };
+	const Double_t ptEdgeDca[nPtBinsDca + 1] = {0 ,  0.1 , 0.5 , 0.6 , 0.7,  0.8 , 0.9 , 1.0 , 1.2 , 1.4 , 1.6 , 1.8 , 2. , 2.4 , 3.0 , 4. , 6., 50. };
 
 
 int DrawInput = 0;
@@ -112,13 +108,22 @@ int nMinus;
 
 
 bool NoCut = true;
+bool doCut = false;
 
-int MaxPlus = 25;
-int MaxMinus = 25;
+int MaxPlus = 10;
+int MaxMinus = 10;
 double PassPre;
 
 
+int nPiPlus;
+int nKPlus;
+int nPiMinus;
+int nKMinus;
 
+
+float pthat;
+
+Pythia8::Pythia pythia8;
 
 float const sigmaPos0 = 15.2;
 float const pxlLayer1Thickness = 0.00486;
@@ -134,15 +139,20 @@ int const nVzsDca = 1;
 float const VzEdgeDca[nVzsDca + 1] = { -6.e4, 6.e4};
 
 
+
+float BsMassPDG = 5.36684;
+
 TFile * outFile = new TFile("output.root","RECREATE");
 
 
 
 TTree * nt_sig = new TTree("BsDsKKPiPi","BsDsKKPiPi");
+
 //Bs Kinematics
 float BsPt;
 float BsMass;
 float BsY;
+
 
 //Daughters Kinematics
 
@@ -160,6 +170,11 @@ float kpDca;
 float kmDca;
 float pipDca;
 float pimDca;
+
+
+float Bvtxx;
+float Bvtxy;
+float Bvtxz;
 
 float dcadaughter;
 float dcaToPv_Bs;
@@ -202,10 +217,30 @@ float PiKKMass;
 float const acceptanceRapidity = 1.1; 
 
 
+//TTree * nt_gen = new TTree("BsGenTree","BsGenTree");
 
-TF1 * fKaonMomResolution = new TF1("fKaonMomResolution","0.0175 + 0.0011666667 * x");
-TF1 * fPionMomResolution = new TF1("fPionMomResolution","0.0175 + 0.0011666667 * x");
-TF1 * fProtonMomResolution = new TF1("fProtonMomResolution","0.0175 + 0.0011666667 * x");
+int gEvent;
+float gBvtxx;
+float gBvtxy;
+float gBvtxz;
+float gBpx;
+float gBpy;
+float gBpz;
+float gBpt;
+
+
+int gInEvent;
+float gInBvtxx;
+float gInBvtxy;
+float gInBvtxz;
+float gInBpx;
+float gInBpy;
+float gInBpz;
+float gInBpt;
+
+TF1 * fKaonMomResolution = new TF1("fKaonMomResolution","0.0175 + 0.0011666667 * x",TrackPTMin,TrackPTMax);
+TF1 * fPionMomResolution = new TF1("fPionMomResolution","0.0175 + 0.0011666667 * x",TrackPTMin,TrackPTMax);
+TF1 * fProtonMomResolution = new TF1("fProtonMomResolution","0.0175 + 0.0011666667 * x",TrackPTMin,TrackPTMax);
 
 
 //TF1 * hkPtWg = new TF1("hkPtWg","x*x*TMath::Exp(-x)",0,20);
@@ -284,8 +319,9 @@ vector<int> vecBottom_pim;
 //void fillDouble(int const kf, TLorentzVector* b, double weight, TLorentzVector const& kMom, TLorentzVector const& piMom, TVector3 v00, TVector3 kPos, TVector3 pPos);
 
 void GenerateBackground( int & EventID);
-void GetSignal(int & EventID);
-void SigEvttoEntry();
+//void GetSignal(int & EventID);
+//void GetGen(int & EventID);
+//void SigEvttoEntry();
 
 
 
@@ -298,6 +334,12 @@ float dcaSigned(TVector3 const& p, TVector3 const& pos, TVector3 const& vertex);
 float dcaXY(TVector3 const& p, TVector3 const& pos, TVector3 const& vertex);
 float dcaZ(TVector3 const& p, TVector3 const& pos, TVector3 const& vertex);
 float dca1To2(TVector3 const& p1, TVector3 const& pos1, TVector3 const& p2, TVector3 const& pos2, TVector3& v0);
+void initEvtGen();
+void initPYTHIA8();
+void GenerateDecay(int & EventID);
+//void GenerateSignal(int & EventID);
+void GenerateEvtGen(int & EventID);
+
 int getPtIndexDca(double);
 int getEtaIndexDca(double);
 int getVzIndexDca(double);
@@ -310,6 +352,7 @@ void BackgroundSimulations(int & EventID);
 
 
 int Event;
+float EventSignal;
 
 double PI = 3.1415926538;
 
@@ -333,7 +376,7 @@ float EventNow;
 
 
 
-float EventSig;
+int EventSig;
 int TotalCand;
 
 std::vector<int> EvtToSigEntry;
@@ -344,6 +387,7 @@ int EntryMax;
 
 TFile * SignalFile;
 TTree * ntp_track;
+TTree * ntp_gtrack;
 
 const float ptCut = 0;
 TVector3 const vertex(0,0,0);

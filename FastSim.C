@@ -1,34 +1,45 @@
 #include "FastSim.h"
 
-
 void FastSim(){
 
 
 	//declare vectors//
 
-
-
 	Event = 0;
 
 	init();
 
-	if(RunSignal)	SigEvttoEntry();
+
+	//if(RunSignal)	SigEvttoEntry();
 
 
+
+	if(RunEVTGEN){
+
+		initPYTHIA8();
+
+		cout << "Now Initiate EventGen" << endl;
+		initEvtGen();
+
+	}
 
 
 	for(int i =0; i < NEvents; i++){
 
-		cout << "Now Working on Event = " << i << endl;
+		if(i%10000 == 0)cout << "Now Working on Event = " << i << endl;
 		Event = i;
 		if(RunBackground)	GenerateBackground(Event);
-		if(RunSignal)	GetSignal(Event);	
+//		if(RunSignal)	GetSignal(Event);
+//		if(RunSignal) GetGen(Event);
+		if(RunBackground) GenerateDecay(Event);
+		if(RunEVTGEN) GenerateEvtGen(Event);
 		BackgroundSimulations(Event);
 		Event = Event + 1;
 
 
 	}
 
+	cout << "Now End" << endl;
 	end();
 }
 
@@ -46,21 +57,25 @@ void BackgroundSimulations(int &EventID){
 
 
 	//cout << "Pass Here" << endl;
-	
-	cout << "nPlus = " << nPlus << "   vecPt_kp.size() = " << vecPt_kp.size() << endl;
-	cout << "nMinus = " << nMinus << "   vecPt_km.size() = " << vecPt_km.size() << endl;
+
+	if( vecPt_kp.size()  > 4 && vecPt_km.size() > 4){
+
+		cout << "nPlus = " << nPlus << "   vecPt_kp.size() = " << vecPt_kp.size() << endl;
+		cout << "nMinus = " << nMinus << "   vecPt_km.size() = " << vecPt_km.size() << endl;
+
+	}
 
 	outFile->cd();
 	TVector3 v0_Bs(0,0,0);
 
-	for(int i = 0; i < nPlus; i++){
-		for(int j = 0; j < nMinus; j++){
+	for(int i = 0; i < vecPt_kp.size(); i++){
+		for(int j = 0; j <  vecPt_km.size(); j++){
 
 
-			for(int k = 0; k < nPlus; k++){
+			for(int k = 0; k <  vecPt_pip.size() ; k++){
 
 
-				for(int l = 0; l < nMinus; l++){
+				for(int l = 0; l < vecPt_pim.size(); l++){
 
 					//	if(PairNow%100000==0) cout << "Now Working on Combination Pair = " << PairNow << endl;
 
@@ -102,10 +117,15 @@ void BackgroundSimulations(int &EventID){
 						cosTheta_Bs = (v0_Bs - vertex).Unit().Dot(BsMom.Vect().Unit());
 
 
+						Bvtxx = v0_Bs.X();
+						Bvtxy = v0_Bs.Y();
+						Bvtxz = v0_Bs.Z();
+
 						kpDca = vecDCA_kp[i];
 						kmDca = vecDCA_km[j];
 						pipDca = vecDCA_pip[k];
 						pimDca = vecDCA_pim[l];
+
 
 
 
@@ -134,9 +154,9 @@ void BackgroundSimulations(int &EventID){
 
 						bool PassDCA = false;
 						if(dcadaughter < DCACut) PassDCA = true;
-		
+
 						if(!PassDCA) continue;
-			
+
 
 
 						BsPt = BsMom.Perp();
@@ -177,7 +197,7 @@ void BackgroundSimulations(int &EventID){
 	double Efficiency = PassEvents/TotalEvents;
 
 	PassPre = nt_sig->GetEntries();
-	cout << "Total Pairs = " << TotalEvents << "   Passed Pairs = " << PassEvents << "   Efficiency =  " << Efficiency << endl;
+	if(Efficiency > 0) cout << "Total Pairs = " << TotalEvents << "   Passed Pairs = " << PassEvents << "   Efficiency =  " << Efficiency << endl;
 
 	clean();
 
@@ -196,25 +216,30 @@ void GenerateBackground( int &EventID){
 
 
 
-	//	  Double_t nPlus_tmp, nMinus_tmp;
+	//	  Double_t nPions_tmp, nKaons_tmp;
 
-	nPlus = gRandom->Integer(MaxPlus);
-	nMinus = gRandom->Integer(MaxMinus);
-
-
-	cout << "nPlus = " << nPlus << "    nMinus = " << nMinus << endl;
+	nPiPlus = gRandom->Integer(MaxPlus);
+	nKPlus = gRandom->Integer(MaxMinus);
 
 
 
 
 
+	nPiMinus = nPiPlus;
+	nKMinus = nKPlus;
+
+	nPlus = nPiPlus + nKPlus;
+	nMinus = nPiMinus + nKMinus;
+
+	cout << "nPlus = " << nPlus << "    nKaons = " << nMinus << endl;
 
 
 
 
+	//Assuming Pi+ = Pi-//
 
-
-	for(int ipi=0; ipi<nPlus; ipi++) {
+	//Pi+ Loop
+	for(int ipi=0; ipi<nPiPlus; ipi++) {
 		//	cout << "hpiPtWg->Integral() = " << hpiPtWg->Integral() << endl;	
 		float pt = hpiPtWg->GetRandom();//gRandom->Uniform(0.6,20);
 		//	cout << "Pass Inside" << endl;
@@ -222,10 +247,10 @@ void GenerateBackground( int &EventID){
 		float phi = gRandom->Uniform(-PI,PI);
 		FourMom.SetPtEtaPhiM(pt, eta , phi, M_PION_PLUS);
 		rcFourMom = smearMom(FourMom,fPionMomResolution);
-		if (rcFourMom.Perp()<ptCut) continue;
+		if (rcFourMom.Perp()<minPtCut) continue;
 		rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
 		float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
-		//if(rcdca < DCATrackCut) continue;
+		if(rcdca < DCATrackCut) continue;
 
 
 		//Identify as Pi+//
@@ -251,14 +276,54 @@ void GenerateBackground( int &EventID){
 	}
 
 
+	//Pi- Loop
+	for(int ipi=0; ipi<nPiMinus; ipi++) {
+		//	cout << "hpiPtWg->Integral() = " << hpiPtWg->Integral() << endl;	
+		float pt = hpiPtWg->GetRandom();//gRandom->Uniform(0.6,20);
+		//	cout << "Pass Inside" << endl;
+		float eta = gRandom->Uniform(-1,1);
+		float phi = gRandom->Uniform(-PI,PI);
+		FourMom.SetPtEtaPhiM(pt, eta , phi, M_PION_MINUS);
+		rcFourMom = smearMom(FourMom,fPionMomResolution);
+		if (rcFourMom.Perp()<minPtCut) continue;
+		rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+		float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+		if(rcdca < DCATrackCut) continue;
+
+
+		//Identify as Pi-//
+		vecTrackID_pim.push_back(ipi);
+		vecDCA_pim.push_back(rcdca);               
+		vecPt_pim.push_back(rcFourMom.Perp());
+		vecEta_pim.push_back(rcFourMom.Eta());
+		vecPhi_pim.push_back(rcFourMom.Phi());
+		vecPos_pim.push_back(rcPos);
+		vecType_pim.push_back(0);
+		vecBottom_pim.push_back(0); 
+
+		//Identify as K-//
+		vecTrackID_km.push_back(ipi);
+		vecDCA_km.push_back(rcdca);               
+		vecPt_km.push_back(rcFourMom.Perp());
+		vecEta_km.push_back(rcFourMom.Eta());
+		vecPhi_km.push_back(rcFourMom.Phi());
+		vecPos_km.push_back(rcPos);
+		vecType_km.push_back(0);
+		vecBottom_km.push_back(0); 
+
+	}
+
+
+
+
 	/*
-	   for(int ik=0; ik<nPlus; ik++) {
+	   for(int ik=0; ik<nPions; ik++) {
 	   float pt = hkPtWg->GetRandom();//gRandom->Uniform(0.6,20);
 	   float eta = gRandom->Uniform(-1,1);
 	   float phi = gRandom->Uniform(-PI,PI);
 	   FourMom.SetPtEtaPhiM(pt, eta , phi, M_KAON_PLUS);
 	   rcFourMom = smearMom(FourMom,fKaonMomResolution);
-	   if (rcFourMom.Perp()<ptCut) continue;
+	   if (rcFourMom.Perp()<minPtCut) continue;
 	   rcPos = smearPosData(1, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
 	   float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 	   if(rcdca < DCATrackCut) continue;
@@ -275,20 +340,58 @@ void GenerateBackground( int &EventID){
 
 
 
-
-	for(int ipi=0; ipi<nMinus; ipi++) {
-		float pt = hpiPtWg->GetRandom();//gRandom->Uniform(0.6,20);
+	//K+ Loop
+	for(int ik=0; ik<nKPlus; ik++) {
+		float pt = hkPtWg->GetRandom();//gRandom->Uniform(0.6,20);
 		float eta = gRandom->Uniform(-1,1);
 		float phi = gRandom->Uniform(-PI,PI);
-		FourMom.SetPtEtaPhiM(pt, eta , phi, M_PION_MINUS);
-		rcFourMom = smearMom(FourMom,fPionMomResolution);
-		if (rcFourMom.Perp()<ptCut) continue;
-		rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+		FourMom.SetPtEtaPhiM(pt, eta , phi, M_KAON_PLUS);
+		rcFourMom = smearMom(FourMom,fKaonMomResolution);
+		if (rcFourMom.Perp()<minPtCut) continue;
+		rcPos = smearPosData(1, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
 		float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
-	//	if(rcdca < DCATrackCut) continue;
+		if(rcdca < DCATrackCut) continue;
+
+		//Identify as Pi+//
+		vecTrackID_pip.push_back(ik+nPiPlus);
+		vecDCA_pip.push_back(rcdca);               
+		vecPt_pip.push_back(rcFourMom.Perp());
+		vecEta_pip.push_back(rcFourMom.Eta());
+		vecPhi_pip.push_back(rcFourMom.Phi());
+		vecPos_pip.push_back(rcPos);
+		vecType_pip.push_back(0);
+		vecBottom_pip.push_back(0); 
+
+
+		//Identify as K+//
+
+		vecTrackID_kp.push_back(ik+nPiPlus);
+		vecDCA_kp.push_back(rcdca);               
+		vecPt_kp.push_back(rcFourMom.Perp());
+		vecEta_kp.push_back(rcFourMom.Eta());
+		vecPhi_kp.push_back(rcFourMom.Phi());
+		vecPos_kp.push_back(rcPos);
+		vecType_kp.push_back(0);
+		vecBottom_kp.push_back(0); 
+
+
+	}
+
+
+	//K- Loop
+	for(int ik=0; ik<nKMinus; ik++) {
+		float pt = hkPtWg->GetRandom();//gRandom->Uniform(0.6,20);
+		float eta = gRandom->Uniform(-1,1);
+		float phi = gRandom->Uniform(-PI,PI);
+		FourMom.SetPtEtaPhiM(pt, eta , phi, M_KAON_MINUS);
+		rcFourMom = smearMom(FourMom,fKaonMomResolution);
+		if (rcFourMom.Perp()<minPtCut) continue;
+		rcPos = smearPosData(1, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+		float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+		if(rcdca < DCATrackCut) continue;
 
 		//Identify as Pi-//
-		vecTrackID_pim.push_back(ipi);
+		vecTrackID_pim.push_back(ik+nPiMinus);
 		vecDCA_pim.push_back(rcdca);               
 		vecPt_pim.push_back(rcFourMom.Perp());
 		vecEta_pim.push_back(rcFourMom.Eta());
@@ -300,7 +403,7 @@ void GenerateBackground( int &EventID){
 
 		//Identify as K-//
 
-		vecTrackID_km.push_back(ipi);
+		vecTrackID_km.push_back(ik+nPiMinus);
 		vecDCA_km.push_back(rcdca);               
 		vecPt_km.push_back(rcFourMom.Perp());
 		vecEta_km.push_back(rcFourMom.Eta());
@@ -314,13 +417,13 @@ void GenerateBackground( int &EventID){
 
 
 	/*
-	   for(int ik=0; ik<nMinus; ik++) {
+	   for(int ik=0; ik<nKaons; ik++) {
 	   float pt = hkPtWg->GetRandom();//gRandom->Uniform(0.6,20);
 	   float eta = gRandom->Uniform(-1,1);
 	   float phi = gRandom->Uniform(-PI,PI);
 	   FourMom.SetPtEtaPhiM(pt, eta , phi, M_KAON_MINUS);
 	   rcFourMom = smearMom(FourMom,fKaonMomResolution);
-	   if (rcFourMom.Perp()<ptCut) continue;
+	   if (rcFourMom.Perp()<minPtCut) continue;
 	   rcPos = smearPosData(1, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
 	   float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 	   if(rcdca < DCATrackCut) continue;
@@ -342,6 +445,563 @@ void GenerateBackground( int &EventID){
 }
 
 
+void GenerateDecay(int & EventID){
+
+	//cout << "BRO It WORK BRO" << endl;
+
+	pythia8.next();
+
+	pthat = pythia8.info.pTHat();
+	//cout << "Event = " << EventID << "   Total Particles = " << pythia8.event.nFinal() << endl; 
+
+	int totalpar = pythia8.event.nFinal();
+	int EventSize =  pythia8.event.size();
+
+
+
+	for(int i = 0; i < EventSize; i++){
+		if(!pythia8.event[i].isFinal()){
+			//cout << "SUCK BRO" << endl;
+			continue;
+
+		}
+
+		int id = pythia8.event[i].id();
+		float pt = pythia8.event[i].pT();
+		float eta = pythia8.event[i].eta();
+		float phi = pythia8.event[i].phi();
+
+
+		float vx  = pythia8.event[i].xProd();
+		float vy  = pythia8.event[i].yProd();
+		float vz  = pythia8.event[i].zProd();
+
+		Pos.SetXYZ(vx*1000,vy*1000,vz*1000);
+
+
+
+		//	cout << "particle i = " << i << "   PDG ID = " << TMath::Abs(pythia8.event[i].id()) << endl;
+
+
+		if (abs(id)!=321 && abs(id)!=211) continue;
+		if(id == 211 || id == 321) {
+
+			//cout << "K+/Pi+ Recorded!!" << endl;
+
+
+			if(id == 211){
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_PION_PLUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+				rcPos = smearPosData(0, 0, 7, rcFourMom, Pos);
+
+			}
+
+			if(id == 321){
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_PLUS);
+				//	FourMom.SetXYZM(gpx, gpy , gpz, M_KAON_MINUS);
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+				rcPos = smearPosData(1, 0, 7, rcFourMom, Pos);
+			}
+
+			if (rcFourMom.Perp()<minPtCut) continue;
+			//rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+			//			TVector3 rcPosSig(gvx * 10000,gvy * 10000,gvz * 10000);
+
+			float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+			if(rcdca < DCATrackCut) continue;
+			//	cout << "Pass 4" << endl;
+
+
+			//Identify as Pi+//
+
+			vecTrackID_pip.push_back(nPlus);
+			vecDCA_pip.push_back(rcdca);               
+			vecPt_pip.push_back(rcFourMom.Perp());
+			vecEta_pip.push_back(rcFourMom.Eta());
+			vecPhi_pip.push_back(rcFourMom.Phi());
+			vecPos_pip.push_back(rcPos);
+			if(id == 211 )	vecType_pip.push_back(3);
+			if(id == 321 )	vecType_pip.push_back(4);
+			vecBottom_pip.push_back(1); 
+
+
+			//Identify as K+//
+			vecTrackID_kp.push_back(nPlus);
+			vecDCA_kp.push_back(rcdca);               
+			vecPt_kp.push_back(rcFourMom.Perp());
+			vecEta_kp.push_back(rcFourMom.Eta());
+			vecPhi_kp.push_back(rcFourMom.Phi());
+			vecPos_kp.push_back(rcPos);
+			if(id == 211 )	vecType_kp.push_back(4);
+			if(id == 321 )	vecType_kp.push_back(3);
+			vecBottom_kp.push_back(1); 
+
+
+			nPlus = nPlus + 1;
+		}
+
+
+
+		if(id == -211 || id == -321) {
+
+			//		cout << "K-/Pi- Recorded!!" << endl;
+
+
+			if(id == -211){
+
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_PION_MINUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+				rcPos = smearPosData(0, 0, 7, rcFourMom, Pos);
+				//			cout << "Pass Pos Pi" << endl;
+
+			}
+
+			if(id == -321){
+
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_MINUS);
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+				rcPos = smearPosData(1, 0, 7, rcFourMom, Pos);
+
+			}
+
+			//			cout << "Pass 0 " << endl;
+
+			if (rcFourMom.Perp()<minPtCut) continue;
+			//rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+			//		TVector3 rcPosSig(gvx * 10000,gvy * 10000,gvz * 10000);
+			//		rcPos = smearPosData(0, gvz, 8, rcFourMom, rcPosSig);
+
+			float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+			if(rcdca < DCATrackCut) continue;
+
+			//			cout << "Pass 1 " << endl;
+			//Identify as Pi-//
+
+			vecTrackID_pim.push_back(nMinus);
+			vecDCA_pim.push_back(rcdca);               
+			vecPt_pim.push_back(rcFourMom.Perp());
+			vecEta_pim.push_back(rcFourMom.Eta());
+			vecPhi_pim.push_back(rcFourMom.Phi());
+			vecPos_pim.push_back(rcPos);
+			if(id == -211 )	vecType_pim.push_back(3);
+			if(id == -321 )	vecType_pim.push_back(4);
+			vecBottom_pim.push_back(1); 
+			//			cout << "Pass 2 " << endl;
+
+
+			//Identify as K-//
+
+			vecTrackID_km.push_back(nMinus);
+			vecDCA_km.push_back(rcdca);               
+			vecPt_km.push_back(rcFourMom.Perp());
+			vecEta_km.push_back(rcFourMom.Eta());
+			vecPhi_km.push_back(rcFourMom.Phi());
+			vecPos_km.push_back(rcPos);
+			if(id == -211 )	vecType_km.push_back(4);
+			if(id == -321 )	vecType_km.push_back(3);
+			vecBottom_km.push_back(1); 
+			//		cout << "Pass 3 " << endl;
+
+
+			nMinus = nMinus + 1;
+		}
+
+
+
+
+
+	}
+
+
+
+
+
+	//	return;
+
+
+}
+
+
+/*
+
+   void GenerateDecay(  int & EventID){
+
+
+   if(EventID%10000 == 0)	cout << "Now Inside Fucking EvtGen for Event = " << EventID  << endl;
+
+   gRandom->SetSeed();
+
+
+//pythia8 = new PHPythia8();
+
+//cout << "Pass 1" << endl;
+
+pythia8->Clear();
+pythia8->Make();
+int npar = pythia8->Event()->GetNumberOfParticles();
+StarGenEvent* evt = pythia8->Event();	
+//	pythia8->init();
+//	pythia8->next();
+
+
+//int npar = pythia8->Event()->nFinal();
+
+//	evt = pythia8->Event();	
+
+//		cout << "Pass 2" << endl;
+
+//cout << "NParticle = " << npar << endl;
+
+
+
+
+for (int ipar=0;ipar<npar;ipar++){
+
+StarGenParticle* p =  ((*evt)[ipar]);
+int id = p->GetId();
+
+int momidx = p->GetFirstMother();
+int momid = ((*evt)[momidx])->GetId();
+
+//	int mammyidx =  p->GetSecondMother();
+//	int mammyid = ((*evt)[mammyidx])->GetId();
+
+int motheridx = p->GetLastMother();
+int motherpdg = ((*evt)[motheridx])->GetId();
+
+int mammyidx = ((*evt)[motheridx])->GetFirstDaughter();
+int mammyid = ((*evt)[mammyidx])->GetId();
+
+
+//		if(abs(motherpdg) != 531) continue;
+
+if(doCut){
+
+
+if (abs(id)!=321 && abs(id)!=211) continue;
+if (fabs(p->momentum().PseudoRapidity())>=1.1) continue;
+
+if(abs(id) == 321 && abs(momid) != 333) continue;
+if(abs(id) == 321 && abs(mammyidx) != 431) continue;
+if(abs(id) == 221 && abs(momid) != 531 && abs(momid) != 431 ) continue;
+
+}
+
+Pos.SetXYZ(p->GetVx()*1000,p->GetVy()*1000,p->GetVz()*1000);
+
+//	cout << "Pass 3" << endl;
+
+if(id == 211 || id == 321) {
+
+//cout << "K+/Pi+ Recorded!!" << endl;
+
+FourMom = p->momentum();
+
+if(id == 211){
+	//FourMom.SetXYZM(gpx, gpy , gpz, M_PION_MINUS);
+	rcFourMom = smearMom(FourMom,fPionMomResolution);
+	rcPos = smearPosData(0, 0, 7, rcFourMom, Pos);
+
+}
+
+if(id == 321){
+	//	FourMom.SetXYZM(gpx, gpy , gpz, M_KAON_MINUS);
+	rcFourMom = smearMom(FourMom,fKaonMomResolution);
+	rcPos = smearPosData(1, 0, 7, rcFourMom, Pos);
+}
+
+if (rcFourMom.Perp()<minPtCut) continue;
+//rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+//			TVector3 rcPosSig(gvx * 10000,gvy * 10000,gvz * 10000);
+
+float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+if(rcdca < DCATrackCut) continue;
+//	cout << "Pass 4" << endl;
+
+
+//Identify as Pi+//
+
+vecTrackID_pip.push_back(nPlus);
+vecDCA_pip.push_back(rcdca);               
+vecPt_pip.push_back(rcFourMom.Perp());
+vecEta_pip.push_back(rcFourMom.Eta());
+vecPhi_pip.push_back(rcFourMom.Phi());
+vecPos_pip.push_back(rcPos);
+if(id == 211 )	vecType_pip.push_back(3);
+if(id == 321 )	vecType_pip.push_back(4);
+vecBottom_pip.push_back(1); 
+
+
+//Identify as K+//
+vecTrackID_kp.push_back(nPlus);
+vecDCA_kp.push_back(rcdca);               
+vecPt_kp.push_back(rcFourMom.Perp());
+vecEta_kp.push_back(rcFourMom.Eta());
+vecPhi_kp.push_back(rcFourMom.Phi());
+vecPos_kp.push_back(rcPos);
+if(id == 211 )	vecType_kp.push_back(4);
+if(id == 321 )	vecType_kp.push_back(3);
+vecBottom_kp.push_back(1); 
+
+
+nPlus = nPlus + 1;
+}
+
+
+
+
+//	cout << "Pass 5" << endl;
+
+if(id == -211 || id == -321) {
+
+	//	cout << "K-/Pi- Recorded!!" << endl;
+
+
+	FourMom = p->momentum();
+
+	//cout << "Pass 4 Momentum " << endl;
+
+	if(id == -211){
+		//	FourMom.SetXYZM(gpx, gpy , gpz, M_PION_MINUS);
+		rcFourMom = smearMom(FourMom,fPionMomResolution);
+		//			cout << "Pass Reso Pi" << endl;
+
+		//			cout << "rcFourMom.Pt() = " << rcFourMom.Pt() << "   Pos = " << Pos.X() << endl;
+
+		rcPos = smearPosData(0, 0, 7, rcFourMom, Pos);
+		//			cout << "Pass Pos Pi" << endl;
+
+	}
+
+	if(id == -321){
+		//	FourMom.SetXYZM(gpx, gpy , gpz, M_KAON_MINUS);
+		rcFourMom = smearMom(FourMom,fKaonMomResolution);
+		//		cout << "Pass Reso K" << endl;
+		rcPos = smearPosData(1, 0, 7, rcFourMom, Pos);
+		//		cout << "Pass Pos K" << endl;
+
+	}
+
+	//			cout << "Pass 0 " << endl;
+
+	if (rcFourMom.Perp()<minPtCut) continue;
+	//rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+	//		TVector3 rcPosSig(gvx * 10000,gvy * 10000,gvz * 10000);
+	//		rcPos = smearPosData(0, gvz, 8, rcFourMom, rcPosSig);
+
+	float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+	if(rcdca < DCATrackCut) continue;
+
+	//			cout << "Pass 1 " << endl;
+	//Identify as Pi-//
+
+	vecTrackID_pim.push_back(nMinus);
+	vecDCA_pim.push_back(rcdca);               
+	vecPt_pim.push_back(rcFourMom.Perp());
+	vecEta_pim.push_back(rcFourMom.Eta());
+	vecPhi_pim.push_back(rcFourMom.Phi());
+	vecPos_pim.push_back(rcPos);
+	if(id == -211 )	vecType_pim.push_back(3);
+	if(id == -321 )	vecType_pim.push_back(4);
+	vecBottom_pim.push_back(1); 
+	//			cout << "Pass 2 " << endl;
+
+
+	//Identify as K-//
+
+	vecTrackID_km.push_back(nMinus);
+	vecDCA_km.push_back(rcdca);               
+	vecPt_km.push_back(rcFourMom.Perp());
+	vecEta_km.push_back(rcFourMom.Eta());
+	vecPhi_km.push_back(rcFourMom.Phi());
+	vecPos_km.push_back(rcPos);
+	if(id == -211 )	vecType_km.push_back(4);
+	if(id == -321 )	vecType_km.push_back(3);
+	vecBottom_km.push_back(1); 
+	//		cout << "Pass 3 " << endl;
+
+
+	nMinus = nMinus + 1;
+}
+
+
+
+//	cout << "Pass 6" << endl;
+
+
+}
+
+
+
+
+}
+
+*/
+
+void GenerateEvtGen(int & EventID){
+
+
+	cout << "Now Doing FUCKING EVT GEN BRO on FUCKING EVENT = " << EventID  << endl;
+
+	if(!RunBackground){
+		nPlus = 0;
+		nMinus = 0;
+	}
+
+	TClonesArray daughters("TParticle", 10);
+	TLorentzVector* BsVecSig = new TLorentzVector;
+
+	getKinematics(*BsVecSig, BsMassPDG);
+
+	myEvtGenDecayer->Decay(531, BsVecSig);
+	myEvtGenDecayer->ImportParticles(&daughters);
+
+	int nTrk = daughters.GetEntriesFast();
+
+
+
+
+	for (int iTrk = 0; iTrk < nTrk; ++iTrk)
+	{
+
+		TParticle* ptl0 = (TParticle*)daughters.At(iTrk);
+		int id = ptl0->GetPdgCode();
+		ptl0->Momentum(FourMom);
+		TVector3 rcPosSig(ptl0->Vx() * 1000., ptl0->Vy() * 1000., ptl0->Vz() * 1000.);
+
+
+		if(id == 211 || id == 321) {
+
+			//cout << "K+/Pi+ Recorded!!" << endl;
+
+			//	FourMom = p->momentum();
+
+			if(id == 211){
+				//FourMom.SetXYZM(gpx, gpy , gpz, M_PION_MINUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+				rcPos = smearPosData(0, 0, 7, rcFourMom, rcPosSig);
+
+			}
+
+			if(id == 321){
+				//	FourMom.SetXYZM(gpx, gpy , gpz, M_KAON_MINUS);
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+				rcPos = smearPosData(1, 0, 7, rcFourMom, rcPosSig);
+			}
+
+			if (rcFourMom.Perp()<minPtCut) continue;
+			//rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+			//			TVector3 rcPosSig(gvx * 10000,gvy * 10000,gvz * 10000);
+
+			float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+			if(rcdca < DCATrackCut) continue;
+			//	cout << "Pass 4" << endl;
+
+
+			//Identify as Pi+//
+
+			vecTrackID_pip.push_back(nPlus);
+			vecDCA_pip.push_back(rcdca);               
+			vecPt_pip.push_back(rcFourMom.Perp());
+			vecEta_pip.push_back(rcFourMom.Eta());
+			vecPhi_pip.push_back(rcFourMom.Phi());
+			vecPos_pip.push_back(rcPos);
+			if(id == 211 )	vecType_pip.push_back(1);
+			if(id == 321 )	vecType_pip.push_back(2);
+			vecBottom_pip.push_back(1); 
+
+
+			//Identify as K+//
+			vecTrackID_kp.push_back(nPlus);
+			vecDCA_kp.push_back(rcdca);               
+			vecPt_kp.push_back(rcFourMom.Perp());
+			vecEta_kp.push_back(rcFourMom.Eta());
+			vecPhi_kp.push_back(rcFourMom.Phi());
+			vecPos_kp.push_back(rcPos);
+			if(id == 211 )	vecType_kp.push_back(2);
+			if(id == 321 )	vecType_kp.push_back(1);
+			vecBottom_kp.push_back(1); 
+
+
+			nPlus = nPlus + 1;
+		}
+
+
+
+
+		//	cout << "Pass 5" << endl;
+
+		if(id == -211 || id == -321) {
+
+			//	cout << "K-/Pi- Recorded!!" << endl;
+
+
+			//	FourMom = p->momentum();
+
+			//cout << "Pass 4 Momentum " << endl;
+
+			if(id == -211){
+				//	FourMom.SetXYZM(gpx, gpy , gpz, M_PION_MINUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+
+				rcPos = smearPosData(0, 0, 7, rcFourMom, rcPosSig);
+				//			cout << "Pass Pos Pi" << endl;
+
+			}
+
+			if(id == -321){
+				//	FourMom.SetXYZM(gpx, gpy , gpz, M_KAON_MINUS);
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+				//		cout << "Pass Reso K" << endl;
+				rcPos = smearPosData(1, 0, 7, rcFourMom, rcPosSig);
+				//		cout << "Pass Pos K" << endl;
+
+			}
+
+
+			if (rcFourMom.Perp()<minPtCut) continue;
+
+			float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+
+			vecTrackID_pim.push_back(nMinus);
+			vecDCA_pim.push_back(rcdca);               
+			vecPt_pim.push_back(rcFourMom.Perp());
+			vecEta_pim.push_back(rcFourMom.Eta());
+			vecPhi_pim.push_back(rcFourMom.Phi());
+			vecPos_pim.push_back(rcPos);
+			if(id == -211 )	vecType_pim.push_back(1);
+			if(id == -321 )	vecType_pim.push_back(2);
+			vecBottom_pim.push_back(1); 
+
+
+			//Identify as K-//
+
+			vecTrackID_km.push_back(nMinus);
+			vecDCA_km.push_back(rcdca);               
+			vecPt_km.push_back(rcFourMom.Perp());
+			vecEta_km.push_back(rcFourMom.Eta());
+			vecPhi_km.push_back(rcFourMom.Phi());
+			vecPos_km.push_back(rcPos);
+			if(id == -211 )	vecType_km.push_back(2);
+			if(id == -321 )	vecType_km.push_back(1);
+			vecBottom_km.push_back(1); 
+
+
+			nMinus = nMinus + 1;
+		}
+
+
+	}
+
+
+	daughters.Clear();
+
+
+}
+
+
+/*
+
 
 void SigEvttoEntry(){
 
@@ -353,6 +1013,7 @@ void SigEvttoEntry(){
 
 	TTree * ntp_track = (TTree *) SignalFile->Get("ntp_track");
 	ntp_track->SetBranchAddress("event",&EventNow);
+
 
 	TotalCand = ntp_track->GetEntries();
 
@@ -384,7 +1045,29 @@ void SigEvttoEntry(){
 }
 
 
+void GetGen(int & EventID){
+
+
+	ntp_gtrack->GetEntry(EventID);
+
+	gEvent = gInEvent;
+	gBvtxx = gInBvtxx;
+	gBvtxy = gInBvtxy;
+	gBvtxz = gInBvtxz;
+
+	gBpx = gInBpx;
+	gBpy = gInBpy;
+	gBpz = gInBpz;
+	gBpt = gInBpt;
+
+	nt_gen->Fill();
+
+}
+
+
 void GetSignal(int & EventID){
+
+
 
 	if(!RunBackground){
 		nPlus = 0;
@@ -409,15 +1092,23 @@ void GetSignal(int & EventID){
 
 		if(gflavor == 211 || gflavor == 321) {
 
-			FourMom.SetXYZM(gpx, gpy , gpz, M_PION_PLUS);
-			rcFourMom = smearMom(FourMom,fPionMomResolution);
-			if (rcFourMom.Perp()<ptCut) continue;
+			if(gflavor == 211){
+				FourMom.SetXYZM(gpx, gpy , gpz, M_PION_MINUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+			}
+
+			if(gflavor == 321){
+				FourMom.SetXYZM(gpx, gpy , gpz, M_KAON_MINUS);
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+			}
+
+			if (rcFourMom.Perp()<minPtCut) continue;
 			//rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
-			TVector3 rcPosSig(gvx,gvy,gvz);
-			rcPos = smearPosData(0, 0, 7, rcFourMom, rcPosSig);
+			TVector3 rcPosSig(gvx,gvy ,gvz );
+			rcPos = smearPosData(0, gvz, 8, rcFourMom, rcPosSig);
 
 			float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
-		//	if(rcdca < DCATrackCut) continue;
+			if(rcdca < DCATrackCut) continue;
 
 
 			//Identify as Pi+//
@@ -440,7 +1131,6 @@ void GetSignal(int & EventID){
 			vecEta_kp.push_back(rcFourMom.Eta());
 			vecPhi_kp.push_back(rcFourMom.Phi());
 			vecPos_kp.push_back(rcPos);
-
 			if(gflavor == 211 )	vecType_kp.push_back(0);
 			if(gflavor == 321 )	vecType_kp.push_back(1);
 			vecBottom_kp.push_back(1); 
@@ -455,15 +1145,23 @@ void GetSignal(int & EventID){
 
 		if(gflavor == -211 || gflavor == -321) {
 
-			FourMom.SetXYZM(gpx, gpy , gpz, M_PION_MINUS);
-			rcFourMom = smearMom(FourMom,fPionMomResolution);
-			if (rcFourMom.Perp()<ptCut) continue;
+			if(gflavor == -211){
+				FourMom.SetXYZM(gpx, gpy , gpz, M_PION_MINUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+			}
+
+			if(gflavor == -321){
+				FourMom.SetXYZM(gpx, gpy , gpz, M_KAON_MINUS);
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+			}
+
+			if (rcFourMom.Perp()<minPtCut) continue;
 			//rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
-			TVector3 rcPosSig(gvx,gvy,gvz);
-			rcPos = smearPosData(0, 0, 7, rcFourMom, rcPosSig);
-		
+			TVector3 rcPosSig(gvx ,gvy ,gvz );
+			rcPos = smearPosData(0, gvz, 8, rcFourMom, rcPosSig);
+
 			float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
-		//	if(rcdca < DCATrackCut) continue;
+			if(rcdca < DCATrackCut) continue;
 
 
 			//Identify as Pi-//
@@ -508,6 +1206,105 @@ void GetSignal(int & EventID){
 
 
 }
+
+*/
+
+void initPYTHIA8(){
+
+
+	pythia8.readString("HardQCD:all = on");
+	pythia8.readString("Random:setSeed = on");
+	pythia8.readString("Random:seed = 0");
+	pythia8.readFile("phpythia8.cfg");
+	pythia8.readString("HardQCD:qqbar2bbbar=on");
+	pythia8.readString("HardQCD:gg2bbbar=on");
+	pythia8.readString("HardQCD:qqbar2ccbar=off");
+	pythia8.readString("HardQCD:gg2ccbar=off");
+
+
+	pythia8.init();
+
+
+	cout << "PYTHIA8 INIT" << endl;
+
+	/*
+	   pythia8 = new StarPythia8();
+	   cout << "Pass 4" << endl;
+
+	   pythia8->SetFrame("CMS", 200.0);
+	   pythia8->SetBlue("proton");
+	   cout << "Pass 5" << endl;
+
+	   pythia8->SetYell("proton");            
+	// pythia8->ReadFile("star_hf_tune_v1.1.cmnd");
+	pythia8->Set("HardQCD:qqbar2bbbar=on");
+	pythia8->Set("HardQCD:gg2bbbar=on");
+	pythia8->Set("HardQCD:qqbar2ccbar=off");
+	pythia8->Set("HardQCD:gg2ccbar=off");
+	pythia8->Init();
+	cout << "Pass 6" << endl;
+	*/
+
+	//gSystem->Load("libPHPythia8.so");
+
+	/*
+	   char *charPath = getenv("PYTHIA8");
+	   if (!charPath)
+	   {
+	   cout << "PHPythia8::Could not find $PYTHIA8 path!" << endl;
+	   return;
+	   }
+
+	   std::string thePath(charPath);
+	   thePath += "/xmldoc/";
+	//Pythia8::Pythia m_Pythia8 = new Pythia8::Pythia(thePath.c_str());
+	*/
+
+
+
+
+
+}
+
+
+void initEvtGen()
+{
+	cout << "Now Loading the Fucking EVT GEN with PHENIX SOFTWARE" << endl;
+	
+	
+	gSystem->Load("EvtGen/lib/libEvtGenExternal.so");
+	gSystem->Load("EvtGen/lib/libEvtGen.so");
+
+
+	cout << "DONE LOADING EVTGEN::: GO	!!!!" << endl;	
+	EvtRandomEngine* eng = 0;
+	eng = new EvtSimpleRandomEngine();
+	EvtRandom::setRandomEngine((EvtRandomEngine*)eng);
+	EvtAbsRadCorr* radCorrEngine = 0;
+	std::list<EvtDecayBase*> extraModels;
+	cout << "Pass 8" << endl;
+
+	EvtExternalGenList genList;
+	cout << "Pass 9" << endl;
+	radCorrEngine = genList.getPhotosModel();
+	cout << "Pass 10" << endl;
+
+	extraModels = genList.getListOfModels();
+
+	TString Decay_DEC = "InputDECAYFiles/DECAY.DEC";
+	//TString Decay_DEC = "Bs.Mypythia0.DEC";
+
+	TString Evt_pdl = "InputDECAYFiles/evt.pdl";
+	EvtGen *myGenerator = new EvtGen(Decay_DEC, Evt_pdl, (EvtRandomEngine*)eng, radCorrEngine, &extraModels);
+	myEvtGenDecayer = new PHEvtGenDecayer(myGenerator);
+	cout << "Setting Decay Table" << endl;
+	myEvtGenDecayer->SetDecayTable("InputDECAYFiles/Bs.Mypythia0.DEC");
+	cout << "Pass 10" << endl;
+
+
+
+}
+
 
 
 void getKinematics(TLorentzVector& b, double const mass)
@@ -607,17 +1404,25 @@ TVector3 smearPosData(int const iParticleIndex, double const vz, int cent, TLore
 	// int const iPhiIndex = getPhiIndexDca(rMom.Phi());
 	int const iPtIndex = getPtIndexDca(rMom.Perp());
 
-	//cout << "iPtIndex = " << iPtIndex << endl;
+	//	cout << "iPtIndex = " << iPtIndex << endl;
+	//	cout << "iParticleIndex = " << iParticleIndex << endl;
 	double sigmaPosZ = 0;
 	double sigmaPosXY = 0;
 
+	//	cout << "Pass Inside 1 " << endl;
+
 	if (cent == 8) cent = 7;
 	//All the centrality position smear was based on 0-10% centrality input, so here the cent==0
+	//	cout << "Pass Inside 1.5 " << endl;
 
 	// h2Dca[iParticleIndex][iEtaIndex][iVzIndex][cent][iPtIndex]->GetRandom2(sigmaPosXY,sigmaPosZ);
 	h2Dca[iParticleIndex][iPtIndex]->GetRandom2(sigmaPosXY, sigmaPosZ);
+
+	//	cout << "Pass Inside 1.6 " << endl;
 	sigmaPosZ *= 1.e4;
 	sigmaPosXY *= 1.e4;
+
+	//	cout << "Pass Inside 2 " << endl;
 
 
 	/*if (h1DcaZ1[iParticleIndex][iEtaIndex][iVzIndex][cent][iPtIndex]->ComputeIntegral())
@@ -637,6 +1442,8 @@ TVector3 smearPosData(int const iParticleIndex, double const vz, int cent, TLore
 	newPos.SetZ(0); 
 	TVector3 momPerp(-rMom.Vect().Y(), rMom.Vect().X(), 0.0);
 	newPos -= momPerp.Unit() * sigmaPosXY;
+
+	//cout << "Pass Inside 3 " << endl;
 
 	return TVector3(newPos.X(), newPos.Y(), pos.Z() + sigmaPosZ);
 }
@@ -677,29 +1484,40 @@ void init(){
 
 	gStyle->SetOptStat(0);
 	if(NoCut){
-		PiKKMassWindow = 10;
-		KKMassWindow = 10;
+		PiKKMassWindow = 100;
+		KKMassWindow = 100;
 		ThetaCut = -1;
 		DCACut = 99999;
-		DCATrackCut = 0;
+		DCATrackCut = 200;
 		minPtCut=0;
+	}
+
+	if(NoCut == false){
+		PiKKMassWindow = 0.2;
+		KKMassWindow = 0.1;
+		ThetaCut = 0.0;
+		DCACut = 1000;
+		DCATrackCut = 0;
+		minPtCut=2;
 	}
 
 	if(UseSTAR){
 
-		fPionMomResolution = new TF1("fPionMomResolution","0.00332099 -0.000868694/x -2.04427e-05*x*x + 0.0015437 * x +  0.000544441/(x*x)");
-		fKaonMomResolution = new TF1("fKaonMomResolution","0.00271293 -0.000125306/x  -3.26199e-05*x*x + 0.00171111 * x +  0.000674163/(x*x)");
-		fProtonMomResolution = new TF1("fProtonMomResolution","0.00346318 -0.00152079/x -2.8538e-05*x*x + 0.00161474 * x +  0.00203283/(x*x)");
+		fPionMomResolution = new TF1("fPionMomResolution","0.00332099 -0.000868694/x -2.04427e-05*x*x + 0.0015437 * x +  0.000544441/(x*x)",TrackPTMin,TrackPTMax);
+		fKaonMomResolution = new TF1("fKaonMomResolution","0.00271293 -0.000125306/x  -3.26199e-05*x*x + 0.00171111 * x +  0.000674163/(x*x)",TrackPTMin,TrackPTMax);
+		fProtonMomResolution = new TF1("fProtonMomResolution","0.00346318 -0.00152079/x -2.8538e-05*x*x + 0.00161474 * x +  0.00203283/(x*x)",TrackPTMin,TrackPTMax);
 
 	}
 
 	cout << "DONE LOADING LIBRARIES!!!" << endl;
 
+	/*
 
-	SignalFile = new TFile("G4sPHENIX.root_g4svtx_eval.root");
+	SignalFile = new TFile("InputROOT/G4sPHENIX.root_g4svtx_eval.root");
 	SignalFile->cd();
 
 	ntp_track = (TTree *) SignalFile->Get("ntp_track");
+
 
 
 
@@ -709,7 +1527,7 @@ void init(){
 	ntp_track->SetBranchAddress("gpy",&gpy);
 	ntp_track->SetBranchAddress("gpz",&gpz);
 	ntp_track->SetBranchAddress("gflavor",&gflavor);
-	ntp_track->SetBranchAddress("event",&EventSig);
+	//ntp_track->SetBranchAddress("event",&EventSig);
 
 
 	ntp_track->SetBranchAddress("gvx",&gvx);
@@ -720,13 +1538,19 @@ void init(){
 
 	PassPre = 0;
 
-	nt_sig->Branch("Event",&Event,"Event/I");
+	//	nt_sig->Branch("Event",&EventSignal,"Event/I");
+	nt_sig->Branch("pthat",&pthat,"pthat/F");
 	nt_sig->Branch("BsPt",&BsPt,"BsPt/F");
 	nt_sig->Branch("BsMass",&BsMass,"BsMass/F");
 	nt_sig->Branch("BsY",&BsY,"BsY/F");
 	nt_sig->Branch("KKMass",&KKMass,"KKMass/F");
 	nt_sig->Branch("PiKKMass",&PiKKMass,"PiKKMass/F");
-	
+
+
+	nt_sig->Branch("Bvtxx",&Bvtxx,"Bvtxx/F");
+	nt_sig->Branch("Bvtxy",&Bvtxy,"Bvtxy/F");
+	nt_sig->Branch("Bvtxz",&Bvtxz,"Bvtxz/F");
+
 
 
 	nt_sig->Branch("FromBsPiP",&FromBsPiP,"FromBsPiP/I");
@@ -779,7 +1603,29 @@ void init(){
 	nt_sig->Branch("dcakpkm",&dcakpkm,"dcakpkm/F");
 
 
-	TString DCA2DFile = "2DProjection_DcaXyZ_sPHENIX_40_80.root";
+
+	nt_gen->Branch("gBvtxx",&gBvtxx,"gBvtxx/F");
+	nt_gen->Branch("gBvtxy",&gBvtxy,"gBvtxy/F");
+	nt_gen->Branch("gBvtxz",&gBvtxz,"gBvtxz/F");
+
+	nt_gen->Branch("gBpx",&gBpx,"gBpx/F");
+	nt_gen->Branch("gBpy",&gBpy,"gBpy/F");
+	nt_gen->Branch("gBpz",&gBpz,"gBpz/F");
+	nt_gen->Branch("gBpt",&gBpt,"gBpt/F");
+
+	ntp_gtrack = (TTree *) SignalFile->Get("ntp_gtrack");
+
+	//ntp_gtrack->SetBranchAddress("event",&gInEvent);
+	ntp_gtrack->SetBranchAddress("gvx",&gInBvtxx);
+	ntp_gtrack->SetBranchAddress("gvy",&gInBvtxy);
+	ntp_gtrack->SetBranchAddress("gvz",&gInBvtxz);
+
+	ntp_gtrack->SetBranchAddress("gpx",&gInBpx);
+	ntp_gtrack->SetBranchAddress("gpy",&gInBpy);
+	ntp_gtrack->SetBranchAddress("gpz",&gInBpz);
+	ntp_gtrack->SetBranchAddress("gpt",&gInBpt);
+*/
+	TString DCA2DFile = "InputROOT/2DProjection_DcaXyZ_sPHENIX_40_80.root";
 
 	fDca2D = new TFile(DCA2DFile.Data());
 	fDca2D->cd();
@@ -796,7 +1642,7 @@ void init(){
 	cout << "DONE Loading DCA Bro" << endl;
 
 
-	TString SpectraFiles = "input_DaughterPtWg.root"; 
+	TString SpectraFiles = "InputROOT/input_DaughterPtWg.root"; 
 
 	InputSpectra = new TFile(SpectraFiles.Data());
 
@@ -859,10 +1705,10 @@ void init(){
 		//c->SetLogy();
 		c->SaveAs("Plots/InputSpectra.png");
 
-		
+
 		TCanvas * c2 = new TCanvas("c2","c2",600,600);
 		c2->cd();
-		
+
 		c2->SetLogy();
 
 		fPionMomResolution->GetXaxis()->SetTitle("p_{T} (GeV/c)");
@@ -878,7 +1724,7 @@ void init(){
 
 		fPionMomResolution->GetYaxis()->SetTitleOffset(1.0);
 
-		fPionMomResolution->Draw();
+		fPionMomResolution->Draw("R");
 		fKaonMomResolution->Draw("SAME");
 		fProtonMomResolution->Draw("SAME");
 
@@ -922,10 +1768,10 @@ void init(){
 		}
 
 	}
-
+	
+	cout << "DONE INIT" << endl;
 
 }
-
 
 
 
@@ -996,12 +1842,10 @@ void clean(){
 void end(){
 
 	outFile->Write();
-
 	outFile->Close();
-
 	fDca2D->Close();
-
-	SignalFile->Close();
+	//SignalFile->Close();
 	InputSpectra->Close();
+
 
 }
