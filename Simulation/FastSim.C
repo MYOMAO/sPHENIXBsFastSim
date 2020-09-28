@@ -87,6 +87,7 @@ void BackgroundSimulations(int &EventID){
 
 					if(i !=k && j != l){
 
+						EventSignal = EventID;
 						FromBsKP = vecBottom_kp[i];
 						FromBsKM = vecBottom_km[j];
 						FromBsPiP = vecBottom_pip[k];
@@ -175,7 +176,7 @@ void BackgroundSimulations(int &EventID){
 						if(fabs(BsMom.Rapidity()) > 1.1) continue;
 						if(cosTheta_Bs < ThetaCut) continue;
 
-
+			
 						nt_sig->Fill();
 
 						//Fill(*KP,*KM,*PIP,*PIM,  vecPos_kp[i], vecPos_km[j], vecPos_pip[k],vecPos_pim[l], v0_Bs);
@@ -1511,34 +1512,7 @@ void init(){
 
 	cout << "DONE LOADING LIBRARIES!!!" << endl;
 
-	/*
-
-	SignalFile = new TFile("InputROOT/G4sPHENIX.root_g4svtx_eval.root");
-	SignalFile->cd();
-
-	ntp_track = (TTree *) SignalFile->Get("ntp_track");
-
-
-
-
-	TotalCand = ntp_track->GetEntries();
-
-	ntp_track->SetBranchAddress("gpx",&gpx);
-	ntp_track->SetBranchAddress("gpy",&gpy);
-	ntp_track->SetBranchAddress("gpz",&gpz);
-	ntp_track->SetBranchAddress("gflavor",&gflavor);
-	//ntp_track->SetBranchAddress("event",&EventSig);
-
-
-	ntp_track->SetBranchAddress("gvx",&gvx);
-	ntp_track->SetBranchAddress("gvy",&gvy);
-	ntp_track->SetBranchAddress("gvz",&gvz);
-
-
-
-	PassPre = 0;
-
-	//	nt_sig->Branch("Event",&EventSignal,"Event/I");
+	nt_sig->Branch("Event",&EventSignal,"Event/I");
 	nt_sig->Branch("pthat",&pthat,"pthat/F");
 	nt_sig->Branch("BsPt",&BsPt,"BsPt/F");
 	nt_sig->Branch("BsMass",&BsMass,"BsMass/F");
@@ -1601,6 +1575,36 @@ void init(){
 	nt_sig->Branch("dcakmpip",&dcakmpip,"dcakmpip/F");
 	nt_sig->Branch("dcakmpim",&dcakmpim,"dcakmpim/F");
 	nt_sig->Branch("dcakpkm",&dcakpkm,"dcakpkm/F");
+
+	cout << "DONE nt_sig Branching BRO" << endl;
+
+	/*
+
+	SignalFile = new TFile("InputROOT/G4sPHENIX.root_g4svtx_eval.root");
+	SignalFile->cd();
+
+	ntp_track = (TTree *) SignalFile->Get("ntp_track");
+
+
+
+
+	TotalCand = ntp_track->GetEntries();
+
+	ntp_track->SetBranchAddress("gpx",&gpx);
+	ntp_track->SetBranchAddress("gpy",&gpy);
+	ntp_track->SetBranchAddress("gpz",&gpz);
+	ntp_track->SetBranchAddress("gflavor",&gflavor);
+	//ntp_track->SetBranchAddress("event",&EventSig);
+
+
+	ntp_track->SetBranchAddress("gvx",&gvx);
+	ntp_track->SetBranchAddress("gvy",&gvy);
+	ntp_track->SetBranchAddress("gvz",&gvz);
+
+
+
+	PassPre = 0;
+
 
 
 

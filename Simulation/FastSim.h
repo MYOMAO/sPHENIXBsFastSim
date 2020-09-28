@@ -78,7 +78,7 @@
 	double TrackPTMin = 0;
 	double TrackPTMax = 20;
 
-	int NEvents = 4;
+	int NEvents = 200;
 
 	bool UseSTAR = true;
 
