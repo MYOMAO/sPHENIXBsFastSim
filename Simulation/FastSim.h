@@ -64,7 +64,7 @@
 	//R__LOAD_LIBRARY(libHFMLTrigger.so)
 	using namespace std;
 
-	bool RunBackground = false;
+	bool RunBackground = true;
 	bool RunSignal = false;
 	bool RunEVTGEN = true;
 
@@ -78,7 +78,7 @@
 	double TrackPTMin = 0;
 	double TrackPTMax = 20;
 
-	int NEvents = 200;
+	int NEvents = 50;
 
 	bool UseSTAR = true;
 
