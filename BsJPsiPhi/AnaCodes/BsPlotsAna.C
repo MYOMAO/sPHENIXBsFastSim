@@ -71,14 +71,14 @@ void BsPlotsAna(){
 	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","DsMassDis","PiPPt","PiMPt","PiPEta","PiMEta","PIPDCA","PIMDCA","BsMassZoom","KKMass","PiKKMass","BVX","BVY","BVZ"};
 	TString VarName[NVar] = {"BsMass","dcadaughter","decayLength_Bs","cosTheta_Bs","abs(KKMass - 1.019461)","abs(PiKKMass - 1.96847)","pipPt","pimPt","pipEta","pimEta","pipDca","pimDca","BsMass","KKMass","PiKKMass","Bvtxx","Bvtxy","Bvtxz"};
 */
-	const int NVar = 18;
-	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} e^{+}  e^{-}) (GeV/c^{2})","DCA Daughters (#mu m)","SV to PV (Decay) Length (#mu m)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{ee} - m_{J/#psi}}| (GeV/c^2)","Postive Track p_{T} (GeV/c)","Negative Track p_{T} (GeV/c)","Postive Track #eta","Negative Track #eta","Postive Track DCA (#mu m)","Negative Track DCA (#mu m)","B_{s}^{0} (K^{+} K^{-} e^{+}  e^{-}) (GeV/c^{2})","m_{KK}","m_{ee}","B_{s}^{0} Vertex X (#mu m)","B_{s}^{0} Vertex Y (#mu m)","B_{s}^{0} Vertex Z (#mu m)"};
-	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,5,1.00,2.90,-4000,-4000,-4000};
-	double XMax[NVar]={10,280,10000,1,0.1,0.2,8,8,1.2,1.2,4000,4000,6,1.04,3.30,4000,4000,4000};
+	const int NVar = 24;
+	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} e^{+}  e^{-}) (GeV/c^{2})","DCA Daughters (#mu m)","SV to PV (Decay) Length (#mu m)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{ee} - m_{J/#psi}}| (GeV/c^2)","K^{+} p_{T} (GeV/c)","K^{-} p_{T} (GeV/c)","K^{+} #eta","K^{-} #eta","K^{+} DCA (#mu m)","K^{-} DCA (#mu m)","e^{+} p_{T} (GeV/c)","e^{-} p_{T} (GeV/c)","e^{+} #eta","e^{-} #eta","e^{+} DCA (#mu m)","e^{-} DCA (#mu m)","B_{s}^{0} (K^{+} K^{-} e^{+}  e^{-}) (GeV/c^{2})","m_{KK}","m_{ee}","B_{s}^{0} Vertex X (#mu m)","B_{s}^{0} Vertex Y (#mu m)","B_{s}^{0} Vertex Z (#mu m)"};
+	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,0,0,-1.2,-1.2,0,0,5,1.00,2.90,-4000,-4000,-4000};
+	double XMax[NVar]={10,280,10000,1,0.1,0.2,8,8,1.2,1.2,4000,4000,8,8,1.2,1.2,4000,4000,6,1.04,3.30,4000,4000,4000};
 
-	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","eeMassDis","EPPt","EMPt","EPEta","EMEta","EPDCA","EMDCA","BsMassZoom","KKMass","eeMass","BVX","BVY","BVZ"};
+	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","eeMassDis","KPPt","KMPt","KPEta","KMEta","KPDCA","KMDCA","EPPt","EMPt","EPEta","EMEta","EPDCA","EMDCA","BsMassZoom","KKMass","eeMass","BVX","BVY","BVZ"};
 
-	TString VarName[NVar] = {"BsMass","dcadaughter","decayLength_Bs","cosTheta_Bs","abs(KKMass - 1.019461)","abs(eeMass - 1.96847)","epPt","emPt","epEta","emEta","epDca","emDca","BsMass","KKMass","eeMass","Bvtxx","Bvtxy","Bvtxz"};
+	TString VarName[NVar] = {"BsMass","dcadaughter","decayLength_Bs","cosTheta_Bs","abs(KKMass - 1.019461)","abs(eeMass - 1.96847)","kpPt","kmPt","kpEta","kmEta","kpDca","kmDca","epPt","emPt","epEta","emEta","epDca","emDca","BsMass","KKMass","eeMass","Bvtxx","Bvtxy","Bvtxz"};
 
 
 
