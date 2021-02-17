@@ -25,7 +25,7 @@ using std::endl;
 
 void BsPlotsAna(){
 
-	int UseTrackptCut = 1;
+	int UseTrackptCut = 0;
 
 	double	TrackptCutValue =  0.2;
 
@@ -43,8 +43,10 @@ void BsPlotsAna(){
 	TString BsSelCut = "(abs(KKMass - 1.019461) < 0.1 && abs(PiKKMass - 1.96847) < 0.10)";
 
 	TString BsDecayCut = "(IsSigPiP>2 && IsSigPiM>2 && IsSigKP>2 && IsSigKM>2)";
-	TString BsCombCut = "(IsSigPiP==0 && IsSigPiM==0 && IsSigKP==0 && IsSigKM==0)";
+	TString BsDecayIDCut = "(IsSigPiP>2 && IsSigPiM>2 && IsSigKP>2 && IsSigKM>2) && (PIDPIP == 211 && PIDPIM == -211 && PIDKP == 321 && PIDKM == -321)";
 
+	TString BsCombCut = "(IsSigPiP==0 && IsSigPiM==0 && IsSigKP==0 && IsSigKM==0)";
+	
 
 
 	if(UseTrackptCut == 1){
@@ -53,7 +55,7 @@ void BsPlotsAna(){
 		BsSelCut = Form("(abs(KKMass - 1.019461) < 0.1 && abs(PiKKMass - 1.96847) < 0.10) && %s",TrackptCut.Data());
 
 	}
-
+	
 	TString infile = "output.root";
 
 	TFile * fin = new TFile(infile.Data());
@@ -62,16 +64,25 @@ void BsPlotsAna(){
 	TTree * BsDsKKPiPi = (TTree *) fin->Get("BsDsKKPiPi");
 
 
-	const int NVar = 24;
+	const int NVar = 35;
 
-	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","DCA Daughters (#mu m)","SV to PV (Decay) Length (#mu m)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{#piKK} - m_{D_{s}}| (GeV/c^2)","Postive Track p_{T} (GeV/c)","Negative Track p_{T} (GeV/c)","Postive Track #eta","Negative Track #eta","Postive Track DCA (#mu m)","Negative Track DCA (#mu m)","B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","m_{KK}","m_{#piKK}","B_{s}^{0} Vertex X (#mu m)","B_{s}^{0} Vertex Y (#mu m)","B_{s}^{0} Vertex Z (#mu m)","D_{s}^{0} Vertex X (#mu m)","D_{s}^{0} Vertex Y (#mu m)","D_{s}^{0} Vertex Z (#mu m)"};
-	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,5,1.00,1.85,-4000,-4000,-4000,-4000,-4000,-4000,0,0,-1};
-	double XMax[NVar]={10,280,10000,1,0.1,0.2,8,8,1.2,1.2,4000,4000,6,1.04,2.05,4000,4000,4000,4000,4000,4000,300,6000,1};
+	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","DCA Daughters (#mum)","SV to PV (Decay) Length (#mum)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{#piKK} - m_{D_{s}}| (GeV/c^2)","Postive Track p_{T} (GeV/c)","Negative Track p_{T} (GeV/c)","Postive Track #eta","Negative Track #eta","Postive Track DCA (#mum)","Negative Track DCA (#mum)","B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","m_{KK}","m_{#piKK}","B_{s}^{0} Vertex X (#mum)","B_{s}^{0} Vertex Y (#mum)","B_{s}^{0} Vertex Z (#mum)","D_{s}^{+} Vertex X (#mum)","D_{s}^{+} Vertex Y (#mum)","D_{s}^{+} Vertex Z (#mum)","D_{s}^{+} DCA Daughters (#mum)","D_{s}^{+} SV to PV (Decay) Length (#mum)","cos(#theta_{D})","B_{s}^{0} Proper Lifetime (#mum/c)","BsPt (GeV/c)","BsP (GeV/c)","First Mother Of #pi^{+}","First Mother Of #pi^{-}","First Mother Of K^{+}","First Mother Of K^{-}","GRAND Mother Of #pi^{+}","GRAND Mother Of #pi^{-}","GRAND Mother Of #K^{+}","GRAND Mother Of #K^{-}"};
+//	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,5,1.00,1.85,-4000,-4000,-4000,-4000,-4000,-4000,0,0,-1,0,0,0,-3000,-3000,-3000,-3000,-3000,-3000,-3000,-3000};
+//	double XMax[NVar]={10,280,10000 * 5,1,0.1,0.2,8,8,1.2,1.2,4000,4000,6,1.04,2.05,4000,4000,4000,4000,4000,4000,300,6000 * 5,1,2500,25,30,3000,3000,3000,3000,3000,3000,3000,3000};
+	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,5,1.00,1.85,-4000,-4000,-4000,-4000,-4000,-4000,0,0,-1,0,0,0,0,0,0,0,0,0,0,0};
+	double XMax[NVar]={10,280,1000*5,1,0.1,0.2,8,8,1.2,1.2,4000,4000,6,1.04,2.05,4000,4000,4000,4000,4000,4000,300,1000,1,2500,25,30,560,560,560,560,800,800,800,800};
 
-	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","DsMassDis","PiPPt","PiMPt","PiPEta","PiMEta","PIPDCA","PIMDCA","BsMassZoom","KKMass","PiKKMass","BVX","BVY","BVZ","DVX","DVY","DVZ","DCADaughters_Ds","SVPVDis_Ds","DsAngle"};
-	TString VarName[NVar] = {"BsMass","dcadaughter","decayLength_Bs","cosTheta_Bs","abs(KKMass - 1.019461)","abs(PiKKMass - 1.96847)","pipPt","pimPt","pipEta","pimEta","pipDca","pimDca","BsMass","KKMass","PiKKMass","Bvtxx","Bvtxy","Bvtxz","Dvtxx","Dvtxy","Dvtxz","dcadaughter_Ds","decayLength_Ds","cosTheta_Ds"};
+	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","DsMassDis","PiPPt","PiMPt","PiPEta","PiMEta","PIPDCA","PIMDCA","BsMassZoom","KKMass","PiKKMass","BVX","BVY","BVZ","DVX","DVY","DVZ","DCADaughters_Ds","SVPVDis_Ds","DsAngle","BsLifeTime","BsPt","BsP","MomPIDPIP","MomPIDPIM","MomPIDKP","MomPIDKM","MotherPIDPIP","MotherPIDPIM","MotherPIDKP","MotherPIDKM"};
+
+	TString VarName[NVar] = {"BsMass","dcadaughter","decayLength_Bs","cosTheta_Bs","abs(KKMass - 1.019461)","abs(PiKKMass - 1.96847)","pipPt","pimPt","pipEta","pimEta","pipDca","pimDca","BsMass","KKMass","PiKKMass","Bvtxx","Bvtxy","Bvtxz","Dvtxx","Dvtxy","Dvtxz","dcadaughter_Ds","decayLength_Ds","cosTheta_Ds","BsLifeTime","BsPt","BsP","MomPIDPIP","MomPIDPIM","MomPIDKP","MomPIDKM","MotherPIDPIP","MotherPIDPIM","MotherPIDKP","MotherPIDKM"};
 
 	TLegend * leg[NVar];
+
+
+	TLatex *latE = new TLatex();
+	latE->SetNDC();
+	latE->SetTextSize(0.05);
+	latE->SetTextColor(kBlack);
 
 	//All Files 
 
@@ -85,7 +96,7 @@ void BsPlotsAna(){
 	TString SelName;
 	TString CombName;
 	TString DecayName;
-
+	TString DecayIDName;
 
 	TFile * fout = new TFile("AnalyzedFile.root","RECREATE");
 	fout->cd();
@@ -100,6 +111,7 @@ void BsPlotsAna(){
 		SelName = Form("%sSel",SaveName[i].Data());
 		CombName = Form("%sComb",SaveName[i].Data());
 		DecayName = Form("%sDecay",SaveName[i].Data());
+		DecayIDName = Form("%sDecayID",SaveName[i].Data());
 
 		//Inclusive Stuffs//
 
@@ -160,6 +172,27 @@ void BsPlotsAna(){
 		BsHisDecay->Sumw2();
 		BsHisDecay->Scale(1.0/BsHisDecay->Integral());
 
+		//Bs Decay ID Matched Required//
+	
+
+		TH1D * BsHisDecayID = new TH1D(DecayIDName.Data(),"",100,XMin[i],XMax[i]); 
+		BsHisDecayID->GetXaxis()->SetTitle(XAxisName[i].Data());
+		BsHisDecayID->GetYaxis()->SetTitle("Normalized Counts");
+		BsHisDecayID->GetXaxis()->CenterTitle();
+		BsHisDecayID->GetYaxis()->CenterTitle();
+		BsHisDecayID->SetLineWidth(2);
+		BsHisDecayID->SetLineColor(kPink);
+
+
+	
+		BsDsKKPiPi->Project(DecayIDName.Data(),VarName[i].Data(),BsDecayIDCut.Data());
+
+		BsHisDecayID->Write();
+
+		BsHisDecayID->Sumw2();
+		BsHisDecayID->Scale(1.0/BsHisDecayID->Integral());
+
+
 		//Bs Signal//
 
 
@@ -198,9 +231,10 @@ void BsPlotsAna(){
 
 		BsHisSel->Sumw2();
 		BsHisSel->Scale(1.0/BsHisSel->Integral());
-
+		
 
 		if(i != 2){
+
 			BsHisSig->Draw("hist");	
 			BsHisAll->Draw("histSAME");
 			BsHisSel->Draw("histSAME");
@@ -209,6 +243,9 @@ void BsPlotsAna(){
 		}
 
 		if(i == 2){
+			BsHisAll->SetMaximum(0.5);
+			c->SetLogy();
+			BsHisAll->GetXaxis()->SetMaxDigits(3);
 			BsHisAll->Draw("hist");
 			BsHisSig->Draw("histSAME");	
 			BsHisSel->Draw("histSAME");
@@ -218,9 +255,7 @@ void BsPlotsAna(){
 		}
 
 
-
-
-		leg[i] = new TLegend(0.36,0.65,0.75,0.85,NULL,"brNDC");
+		leg[i] = new TLegend(0.30,0.65,0.75,0.85,NULL,"brNDC");
 		leg[i]->SetBorderSize(0);
 		leg[i]->SetTextSize(0.040);
 		leg[i]->SetTextFont(42);
@@ -231,10 +266,13 @@ void BsPlotsAna(){
 		leg[i]->AddEntry(BsHisSig,"B_{s}^{0} Signal Decay","l");
 		leg[i]->AddEntry(BsHisSel,"Mass Window Selection Applied","l");
 		leg[i]->AddEntry(BsHisComb,"Random Background from PV","l");
-		leg[i]->AddEntry(BsHisDecay,"Inclusive B_{s}^{0} Decay","l");
+		leg[i]->AddEntry(BsHisDecay,"PYTHIA 8 pp #rightarrow b #bar{b} Decay","l");
 
 
 		leg[i]->Draw("SAME");
+
+
+		latE->DrawLatex(0.55,0.87,"#it{#bf{RECO}}");
 
 
 		OutName = Form("PlotsInclusive/RECO/%s.png",SaveName[i].Data());

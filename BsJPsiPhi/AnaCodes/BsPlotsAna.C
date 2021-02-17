@@ -74,7 +74,7 @@ void BsPlotsAna(){
 	const int NVar = 24;
 	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} e^{+}  e^{-}) (GeV/c^{2})","DCA Daughters (#mu m)","SV to PV (Decay) Length (#mu m)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{ee} - m_{J/#psi}}| (GeV/c^2)","K^{+} p_{T} (GeV/c)","K^{-} p_{T} (GeV/c)","K^{+} #eta","K^{-} #eta","K^{+} DCA (#mu m)","K^{-} DCA (#mu m)","e^{+} p_{T} (GeV/c)","e^{-} p_{T} (GeV/c)","e^{+} #eta","e^{-} #eta","e^{+} DCA (#mu m)","e^{-} DCA (#mu m)","B_{s}^{0} (K^{+} K^{-} e^{+}  e^{-}) (GeV/c^{2})","m_{KK}","m_{ee}","B_{s}^{0} Vertex X (#mu m)","B_{s}^{0} Vertex Y (#mu m)","B_{s}^{0} Vertex Z (#mu m)"};
 	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,0,0,-1.2,-1.2,0,0,5,1.00,2.90,-4000,-4000,-4000};
-	double XMax[NVar]={10,280,10000,1,0.1,0.2,8,8,1.2,1.2,4000,4000,8,8,1.2,1.2,4000,4000,6,1.04,3.30,4000,4000,4000};
+	double XMax[NVar]={10,280,6000,1,0.1,0.2,8,8,1.2,1.2,4000,4000,8,8,1.2,1.2,4000,4000,6,1.04,3.30,4000,4000,4000};
 
 	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","eeMassDis","KPPt","KMPt","KPEta","KMEta","KPDCA","KMDCA","EPPt","EMPt","EPEta","EMEta","EPDCA","EMDCA","BsMassZoom","KKMass","eeMass","BVX","BVY","BVZ"};
 

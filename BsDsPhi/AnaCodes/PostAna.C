@@ -20,6 +20,7 @@
 
 void PostAna(){
 
+
 	gStyle->SetOptStat(0);
 	SetsPhenixStyle();
 
@@ -39,18 +40,33 @@ void PostAna(){
 
 	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","eeMassDis","EPPt","EMPt","EPEta","EMEta","EPDCA","EMDCA","BsMassZoom","KKMass","eeMass","BVX","BVY","BVZ"};
 	*/
+	/*
+	const int NVar = 27;
 
-	const int NVar = 24;
 
-	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","DCA Daughters (#mu m)","SV to PV (Decay) Length (#mu m)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{#piKK} - m_{D_{s}}| (GeV/c^2)","Postive Track p_{T} (GeV/c)","Negative Track p_{T} (GeV/c)","Postive Track #eta","Negative Track #eta","Postive Track DCA (#mu m)","Negative Track DCA (#mu m)","B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","m_{KK}","m_{#piKK}","B_{s}^{0} Vertex X (#mu m)","B_{s}^{0} Vertex Y (#mu m)","B_{s}^{0} Vertex Z (#mu m)","D_{s}^{0} Vertex X (#mu m)","D_{s}^{0} Vertex Y (#mu m)","D_{s}^{0} Vertex Z (#mu m)"};
-	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,5,1.00,1.85,-4000,-4000,-4000,-4000,-4000,-4000,0,0,-1};
-	double XMax[NVar]={10,280,10000,1,0.1,0.2,8,8,1.2,1.2,4000,4000,6,1.04,2.05,4000,4000,4000,4000,4000,4000,300,6000,1};
+	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","DCA Daughters (#mu m)","SV to PV (Decay) Length (#mu m)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{#piKK} - m_{D_{s}}| (GeV/c^2)","Postive Track p_{T} (GeV/c)","Negative Track p_{T} (GeV/c)","Postive Track #eta","Negative Track #eta","Postive Track DCA (#mu m)","Negative Track DCA (#mu m)","B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","m_{KK}","m_{#piKK}","B_{s}^{0} Vertex X (#mu m)","B_{s}^{0} Vertex Y (#mu m)","B_{s}^{0} Vertex Z (#mu m)","D_{s}^{+} Vertex X (#mu m)","D_{s}^{+} Vertex Y (#mu m)","D_{s}^{+} Vertex Z (#mu m)","D_{s}^{+} DCA Daughters (#mu m)","D_{s}^{+} SV to PV (Decay) Length (#mu m)","cos(#theta_{D})","B_{s}^{0} Proper Lifetime (#mu m/c)","BsPt (GeV/c)","BsP (GeV/c)"};
+	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,5,1.00,1.85,-4000,-4000,-4000,-4000,-4000,-4000,0,0,-1,0,0,0};
+	double XMax[NVar]={10,280,10000 * 5,1,0.1,0.2,8,8,1.2,1.2,4000,4000,6,1.04,2.05,4000,4000,4000,4000,4000,4000,300,6000 * 5,1,2500,25,30};
 
-	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","DsMassDis","PiPPt","PiMPt","PiPEta","PiMEta","PIPDCA","PIMDCA","BsMassZoom","KKMass","PiKKMass","BVX","BVY","BVZ","DVX","DVY","DVZ","DCADaughters_Ds","SVPVDis_Ds","DsAngle"};
-	TString VarName[NVar] = {"BsMass","dcadaughter","decayLength_Bs","cosTheta_Bs","abs(KKMass - 1.019461)","abs(PiKKMass - 1.96847)","pipPt","pimPt","pipEta","pimEta","pipDca","pimDca","BsMass","KKMass","PiKKMass","Bvtxx","Bvtxy","Bvtxz","Dvtxx","Dvtxy","Dvtxz","dcadaughter_Ds","decayLength_Ds","cosTheta_Ds"};
+	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","DsMassDis","PiPPt","PiMPt","PiPEta","PiMEta","PIPDCA","PIMDCA","BsMassZoom","KKMass","PiKKMass","BVX","BVY","BVZ","DVX","DVY","DVZ","DCADaughters_Ds","SVPVDis_Ds","DsAngle","BsLifeTime","BsPt","BsP"};
+*/
 
-//	TString VarName[NVar] = {"BsMassGen","dcadaughterGen","decayLength_BsGen","cosTheta_BsGen","abs(KKMassGen - 1.019461)","abs(eeMassGen - 1.96847)","epPtGen","emPtGen","epEtaGen","emEtaGen","epDcaGen","emDcaGen","BsMassGen","KKMassGen","eeMassGen","BvtxxGen","BvtxyGen","BvtxzGen"};
+	const int NVar = 35;
+
+	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","DCA Daughters (#mu m)","SV to PV (Decay) Length (#mu m)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{#piKK} - m_{D_{s}}| (GeV/c^2)","Postive Track p_{T} (GeV/c)","Negative Track p_{T} (GeV/c)","Postive Track #eta","Negative Track #eta","Postive Track DCA (#mu m)","Negative Track DCA (#mu m)","B_{s}^{0} (K^{+} K^{-} #pi^{+}  #pi^{-}) (GeV/c^{2})","m_{KK}","m_{#piKK}","B_{s}^{0} Vertex X (#mu m)","B_{s}^{0} Vertex Y (#mu m)","B_{s}^{0} Vertex Z (#mu m)","D_{s}^{+} Vertex X (#mu m)","D_{s}^{+} Vertex Y (#mu m)","D_{s}^{+} Vertex Z (#mu m)","D_{s}^{+} DCA Daughters (#mu m)","D_{s}^{+} SV to PV (Decay) Length (#mu m)","cos(#theta_{D})","B_{s}^{0} Proper Lifetime (#mu m/c)","BsPt (GeV/c)","BsP (GeV/c)","First Mother PDG ID of #pi^{+}","First Mother PDG ID of #pi^{-}","First Mother PDG ID of K^{+}","First Mother PDG ID of K^{-}","GRAND Mother PDG ID of #pi^{+}","GRAND Mother PDG ID of #pi^{-}","GRAND Mother PDG ID of K^{+}","GRAND Mother PDG ID of K^{-}"};
+	double XMin[NVar]={0,0,0,-1,0,0,0,0,-1.2,-1.2,0,0,5,1.00,1.85,-4000,-4000,-4000,-4000,-4000,-4000,0,0,-1,0,0,0,-3000,-3000,-3000,-3000,-3000,-3000,-3000,-3000};
+	double XMax[NVar]={10,280,1000,1,0.1,0.2,8,8,1.2,1.2,4000,4000,6,1.04,2.05,4000,4000,4000,4000,4000,4000,300,1000,1,2500,25,30,3000,3000,3000,3000,3000,3000,3000,3000};
+
+	TString SaveName[NVar] = {"BsMass","DCADaughters","SVPVDis","Angle","PhiMassDis","DsMassDis","PiPPt","PiMPt","PiPEta","PiMEta","PIPDCA","PIMDCA","BsMassZoom","KKMass","PiKKMass","BVX","BVY","BVZ","DVX","DVY","DVZ","DCADaughters_Ds","SVPVDis_Ds","DsAngle","BsLifeTime","BsPt","BsP","MomPIDPIP","MomPIDPIM","MomPIDKP","MomPIDKM","MotherPIDPIP","MotherPIDPIM","MotherPIDKP","MotherPIDKM"};
+
+
+	TString VarName[NVar] = {"BsMass","dcadaughter","decayLength_Bs","cosTheta_Bs","abs(KKMass - 1.019461)","abs(PiKKMass - 1.96847)","pipPt","pimPt","pipEta","pimEta","pipDca","pimDca","BsMass","KKMass","PiKKMass","Bvtxx","Bvtxy","Bvtxz","Dvtxx","Dvtxy","Dvtxz","dcadaughter_Ds","decayLength_Ds","cosTheta_Ds","BsLifeTime","BsPt","BsP","MomPIDPIP","MomPIDPIM","MomPIDKP","MomPIDKM","MotherPIDPIP","MotherPIDPIM","MotherPIDKP","MotherPIDKM"};
+
+//	TString VarName[NVar] = {"BsMass","dcadaughter","decayLength_Bs","cosTheta_Bs","abs(KKMass - 1.019461)","abs(PiKKMass - 1.96847)","pipPt","pimPt","pipEta","pimEta","pipDca","pimDca","BsMass","KKMass","PiKKMass","Bvtxx","Bvtxy","Bvtxz","Dvtxx","Dvtxy","Dvtxz","dcadaughter_Ds","decayLength_Ds","cosTheta_Ds","BsLifeTime","BsPt","BsP"};
+	//	TString VarName[NVar] = {"BsMassGen","dcadaughterGen","decayLength_BsGen","cosTheta_BsGen","abs(KKMassGen - 1.019461)","abs(eeMassGen - 1.96847)","epPtGen","emPtGen","epEtaGen","emEtaGen","epDcaGen","emDcaGen","BsMassGen","KKMassGen","eeMassGen","BvtxxGen","BvtxyGen","BvtxzGen"};
 	
+
+
 	TLegend * leg[NVar];
 	TString OutName;
 
@@ -59,13 +75,21 @@ void PostAna(){
 	TString SelName;
 	TString CombName;
 	TString DecayName;
+	TString DecayIDName;
 
 	TCanvas * c = new TCanvas("c","c",600,600);
 	c->cd();
 
+	int EndVar = 27;
 
-	
-	for(int i = 0; i < NVar; i++){
+
+	TLatex *latE = new TLatex();
+	latE->SetNDC();
+	latE->SetTextSize(0.05);
+	latE->SetTextColor(kBlack);
+
+
+	for(int i = 0; i < EndVar; i++){
 
 
 		cout << "Now Working on Variable:  " << SaveName[i].Data() << endl;
@@ -75,14 +99,15 @@ void PostAna(){
 		SelName = Form("%sSel",SaveName[i].Data());
 		CombName = Form("%sComb",SaveName[i].Data());
 		DecayName = Form("%sDecay",SaveName[i].Data());
+		DecayIDName = Form("%sDecayID",SaveName[i].Data());
 
-		
+	
 		TH1D * BsHisAll = (TH1D *)  fin->Get(AllName.Data());
 		TH1D * BsHisSig = (TH1D *)  fin->Get(SigName.Data());
 		TH1D * BsHisSel = (TH1D *)  fin->Get(SelName.Data());
 		TH1D * BsHisComb = (TH1D *)  fin->Get(CombName.Data());
 		TH1D * BsHisDecay = (TH1D *)  fin->Get(DecayName.Data());
-
+		TH1D * BsHisDecayID = (TH1D *)  fin->Get(DecayIDName.Data());
 	
 		BsHisAll->GetXaxis()->SetTitle(XAxisName[i].Data());
 		BsHisAll->GetYaxis()->SetTitle("Normalized Counts");
@@ -109,12 +134,60 @@ void PostAna(){
 		BsHisDecay->SetLineWidth(2);
 		BsHisDecay->SetLineColor(kGreen);
 
+		BsHisDecayID->Scale(1.0/BsHisDecayID->Integral());
+		BsHisDecayID->SetLineWidth(2);
+		BsHisDecayID->SetLineColor(kMagenta);
+
+
 
 		BsHisSel->Scale(1.0/BsHisSel->Integral());
 		BsHisSel->SetLineWidth(2);
 		BsHisSel->SetLineColor(kBlue);
 
-		if(i != 2){
+		if(i == 2 ){
+		
+
+			BsHisAll->GetXaxis()->SetMaxDigits(3);
+
+			BsHisAll->GetXaxis()->SetTitleOffset(1.2);
+			BsHisAll->GetYaxis()->SetTitleOffset(1.6);
+
+			BsHisAll->Draw("hist");
+			BsHisSig->Draw("histSAME");	
+			BsHisSel->Draw("histSAME");
+			BsHisComb->Draw("histSAME");
+			BsHisDecay->Draw("histSAME");
+		//	BsHisDecayID->Draw("histSAME");
+
+		}
+		else if(i > 14 && i < 21){
+
+			BsHisComb->GetXaxis()->SetTitle(XAxisName[i].Data());
+			BsHisComb->GetYaxis()->SetTitle("Normalized Counts");
+			BsHisComb->GetXaxis()->CenterTitle();
+			BsHisComb->GetYaxis()->CenterTitle();
+			BsHisComb->GetXaxis()->SetTitleOffset(1.2);
+			BsHisComb->GetYaxis()->SetTitleOffset(1.6);
+
+
+			BsHisComb->Draw("hist");
+			BsHisSig->Draw("histSAME");	
+			BsHisAll->Draw("histSAME");
+			BsHisSel->Draw("histSAME");
+			BsHisDecay->Draw("histSAME");
+		//	BsHisDecayID->Draw("histSAME");
+
+		}
+		else{
+	
+			BsHisSig->GetXaxis()->SetTitle(XAxisName[i].Data());
+			BsHisSig->GetYaxis()->SetTitle("Normalized Counts");
+			BsHisSig->GetXaxis()->CenterTitle();
+			BsHisSig->GetYaxis()->CenterTitle();
+			BsHisSig->GetXaxis()->SetTitleOffset(1.2);
+			BsHisSig->GetYaxis()->SetTitleOffset(1.6);
+
+
 			BsHisSig->Draw("hist");	
 			BsHisAll->Draw("histSAME");
 			BsHisSel->Draw("histSAME");
@@ -122,17 +195,8 @@ void PostAna(){
 			BsHisDecay->Draw("histSAME");
 		}
 
-		if(i == 2){
-			BsHisAll->Draw("hist");
-			BsHisSig->Draw("histSAME");	
-			BsHisSel->Draw("histSAME");
-			BsHisComb->Draw("histSAME");
-			BsHisDecay->Draw("histSAME");
 
-		}
-
-
-		leg[i] = new TLegend(0.36,0.65,0.75,0.85,NULL,"brNDC");
+		leg[i] = new TLegend(0.16,0.65,0.55,0.85,NULL,"brNDC");
 		leg[i]->SetBorderSize(0);
 		leg[i]->SetTextSize(0.040);
 		leg[i]->SetTextFont(42);
@@ -143,9 +207,11 @@ void PostAna(){
 		leg[i]->AddEntry(BsHisSig,"B_{s}^{0} Signal Decay","l");
 		leg[i]->AddEntry(BsHisSel,"Mass Window Selection Applied","l");
 		leg[i]->AddEntry(BsHisComb,"Random Background from PV","l");
-		leg[i]->AddEntry(BsHisDecay,"Inclusive B_{s}^{0} Decay","l");
-		
+		leg[i]->AddEntry(BsHisDecay,"PYTHIA 8 pp #rightarrow b #bar{b} Decay","l");
+		//leg[i]->AddEntry(BsHisDecayID,"PYTHIA 8 - PDG ID Matched","l");		
 		leg[i]->Draw("SAME");
+
+		latE->DrawLatex(0.42,0.87,"#it{#bf{RECO}}");
 
 		OutName = Form("PlotsInclusive/RECO/%s.png",SaveName[i].Data());
 
@@ -154,9 +220,51 @@ void PostAna(){
 	}
 
 
+
+	cout << "Now Working on End" << endl;
+	
+
+	for(int i = EndVar; i < NVar; i++){
+
+		cout << "Now Working on Variable:  " << SaveName[i].Data() << endl;
+
+		DecayName = Form("%sDecay",SaveName[i].Data());
+		
+	
+
+		TH1D * BsHisDecay = (TH1D *)  fin->Get(DecayName.Data());
+		BsHisDecay->GetXaxis()->SetTitle(XAxisName[i].Data());
+		BsHisDecay->Scale(1.0/BsHisDecay->Integral());
+		BsHisDecay->SetLineWidth(2);
+		BsHisDecay->SetLineColor(kGreen);
+		
+
+
+		leg[i] = new TLegend(0.36,0.65,0.75,0.85,NULL,"brNDC");
+		leg[i]->SetBorderSize(0);
+		leg[i]->SetTextSize(0.040);
+		leg[i]->SetTextFont(42);
+		leg[i]->SetFillStyle(0);
+		leg[i]->SetLineWidth(3);
+
+		leg[i]->AddEntry(BsHisDecay,"Inclusive PYTHIA 8 Gen B Decay","l");
+		leg[i]->Draw("SAME");
+
+
+		BsHisDecay->Draw("hist");
+		OutName = Form("PlotsInclusive/DecayPID/%s.png",SaveName[i].Data());
+
+		c->SaveAs(OutName.Data());
+
+
+	}
+
+
+
+
 	TLegend * legGen[NVar];
 
-	for(int i = 0; i < NVar; i++){
+	for(int i = 0; i < EndVar; i++){
 
 
 		cout << "Now Working on Variable:  " << SaveName[i].Data() << endl;
@@ -166,6 +274,7 @@ void PostAna(){
 		SelName = Form("%sSel",SaveName[i].Data());
 		CombName = Form("%sComb",SaveName[i].Data());
 		DecayName = Form("%sDecay",SaveName[i].Data());
+		DecayIDName = Form("%sDecayID",SaveName[i].Data());
 
 	
 		TH1D * BsHisAll = (TH1D *)  finGen->Get(AllName.Data());
@@ -173,8 +282,9 @@ void PostAna(){
 		TH1D * BsHisSel = (TH1D *)  finGen->Get(SelName.Data());
 		TH1D * BsHisComb = (TH1D *)  finGen->Get(CombName.Data());
 		TH1D * BsHisDecay = (TH1D *)  finGen->Get(DecayName.Data());
+		TH1D * BsHisDecayID = (TH1D *)  finGen->Get(DecayIDName.Data());
 
-	
+
 		BsHisAll->GetXaxis()->SetTitle(XAxisName[i].Data());
 		BsHisAll->GetYaxis()->SetTitle("Normalized Counts");
 		BsHisAll->GetXaxis()->CenterTitle();
@@ -200,17 +310,32 @@ void PostAna(){
 		BsHisDecay->SetLineWidth(2);
 		BsHisDecay->SetLineColor(kGreen);
 
+		BsHisDecayID->Scale(1.0/BsHisDecayID->Integral());
+		BsHisDecayID->SetLineWidth(2);
+		BsHisDecayID->SetLineColor(kMagenta);
+
+
 
 		BsHisSel->Scale(1.0/BsHisSel->Integral());
 		BsHisSel->SetLineWidth(2);
 		BsHisSel->SetLineColor(kBlue);
 
 		if(i != 2){
+			
+			BsHisSig->GetXaxis()->SetTitle(XAxisName[i].Data());
+			BsHisSig->GetYaxis()->SetTitle("Normalized Counts");
+			BsHisSig->GetXaxis()->CenterTitle();
+			BsHisSig->GetYaxis()->CenterTitle();
+			BsHisSig->GetXaxis()->SetTitleOffset(1.2);
+			BsHisSig->GetYaxis()->SetTitleOffset(1.2);
+			
 			BsHisSig->Draw("hist");	
 			BsHisAll->Draw("histSAME");
 			BsHisSel->Draw("histSAME");
 			BsHisComb->Draw("histSAME");
 			BsHisDecay->Draw("histSAME");
+		//	BsHisDecayID->Draw("histSAME");
+
 		}
 
 		if(i == 2){
@@ -219,11 +344,12 @@ void PostAna(){
 			BsHisSel->Draw("histSAME");
 			BsHisComb->Draw("histSAME");
 			BsHisDecay->Draw("histSAME");
+		//	BsHisDecayID->Draw("histSAME");
 
 		}
 
 
-		legGen[i] = new TLegend(0.36,0.65,0.75,0.85,NULL,"brNDC");
+		legGen[i] = new TLegend(0.16,0.65,0.55,0.85,NULL,"brNDC");
 		legGen[i]->SetBorderSize(0);
 		legGen[i]->SetTextSize(0.040);
 		legGen[i]->SetTextFont(42);
@@ -234,9 +360,11 @@ void PostAna(){
 		legGen[i]->AddEntry(BsHisSig,"B_{s}^{0} Signal Decay","l");
 		legGen[i]->AddEntry(BsHisSel,"Mass Window Selection Applied","l");
 		legGen[i]->AddEntry(BsHisComb,"Random Background from PV","l");
-		legGen[i]->AddEntry(BsHisDecay,"Inclusive B_{s}^{0} Decay","l");
-			
+		legGen[i]->AddEntry(BsHisDecay,"PYTHIA 8 pp #rightarrow b #bar{b} Decay","l");
+	//	legGen[i]->AddEntry(BsHisDecayID,"PYTHIA 8 - PDG ID Matched","l");			
+
 		legGen[i]->Draw("SAME");
+		latE->DrawLatex(0.42,0.87,"#it{#bf{GEN (Truth)}}");
 
 		OutName = Form("PlotsInclusive/Gen/%s.png",SaveName[i].Data());
 
@@ -246,14 +374,37 @@ void PostAna(){
 
 
 
+	for(int i = EndVar; i < NVar; i++){
+
+
+		DecayName = Form("%sDecay",SaveName[i].Data());
+		TH1D * BsHisDecay = (TH1D *)  finGen->Get(DecayName.Data());
+		BsHisDecay->Scale(1.0/BsHisDecay->Integral());
+		BsHisDecay->SetLineWidth(2);
+		BsHisDecay->SetLineColor(kGreen);
+		
+
+		leg[i]->AddEntry(BsHisDecay,"Inclusive PYTHIA 8 Gen B Decay","l");
+		leg[i]->Draw("SAME");
+
+		BsHisDecay->Draw("hist");
+
+		OutName = Form("PlotsInclusive/DecayPIDGen/%s.png",SaveName[i].Data());
+
+		c->SaveAs(OutName.Data());
+
+
+	}
+
+
 	TLegend * legAllComp[NVar];
 	TLegend * legSigComp[NVar];
 	TLegend * legSelComp[NVar];
 	TLegend * legCombComp[NVar];
 	TLegend * legDecayComp[NVar];
 
+		
 	
-
 	for(int i = 0; i < NVar; i++){
 
 
@@ -529,7 +680,103 @@ void PostAna(){
 
 	}
 
+	const int ResoNVar = 6;
 
+	TString ResoXAxisName[ResoNVar] = {"B_{s}^{0} Vertex X: RECO - GEN (#mu m)","B_{s}^{0} Vertex Y: RECO - GEN (#mu m)","B_{s}^{0} Vertex Z: RECO - GEN (#mu m)","D_{s}^{+} Vertex X: RECO - GEN (#mu m)","D_{s}^{+} Vertex Y: RECO - GEN (#mu m)","D_{s}^{+} Vertex Z: RECO - GEN (#mu m)"};
+	double ResoXMin[ResoNVar]={-1500,-1500,-1500,-1500,-1500,-1500};
+	double ResoXMax[ResoNVar]={1500,1500,1500,1500,1500,1500};
+
+	TString ResoSaveName[ResoNVar] = {"BVXRESO","BVYRESO","BVZRESO","DVXRESO","DVYRESO","DVZRESO"};
+
+	TString ResoVarName[ResoNVar] = {"Bvtxx - BvtxxGen","Bvtxy - BvtxyGen","Bvtxz - BvtxzGen","Dvtxx - DvtxxGen","Dvtxy - DvtxyGen","Dvtxz - DvtxzGen"};
+	TLegend * Resoleg[ResoNVar];
+
+
+	for(int i = 0; i < ResoNVar; i++){
+
+		
+
+		AllName = Form("%sAll",ResoSaveName[i].Data());
+		SigName = Form("%sSig",ResoSaveName[i].Data());
+		SelName = Form("%sSel",ResoSaveName[i].Data());
+		CombName = Form("%sComb",ResoSaveName[i].Data());
+		DecayName = Form("%sDecay",ResoSaveName[i].Data());
+
+
+	
+		TH1D * BsHisAll = (TH1D *)  finGen->Get(AllName.Data());
+		TH1D * BsHisSig = (TH1D *)  finGen->Get(SigName.Data());
+		TH1D * BsHisSel = (TH1D *)  finGen->Get(SelName.Data());
+		TH1D * BsHisComb = (TH1D *)  finGen->Get(CombName.Data());
+		TH1D * BsHisDecay = (TH1D *)  finGen->Get(DecayName.Data());
+
+	
+
+		BsHisAll->GetXaxis()->SetTitle(ResoXAxisName[i].Data());
+		BsHisAll->GetYaxis()->SetTitle("Normalized Counts");
+		BsHisAll->GetXaxis()->CenterTitle();
+		BsHisAll->GetYaxis()->CenterTitle();
+		BsHisAll->GetXaxis()->SetTitleOffset(1.2);
+		BsHisAll->GetYaxis()->SetTitleOffset(1.2);
+
+		BsHisAll->Scale(1.0/BsHisAll->Integral());
+		BsHisAll->SetLineWidth(2);
+		BsHisAll->SetLineColor(kBlack);
+		
+		BsHisSig->Scale(1.0/BsHisSig->Integral());
+		BsHisSig->SetLineWidth(2);
+		BsHisSig->SetLineColor(kRed);
+
+
+		BsHisComb->Scale(1.0/BsHisComb->Integral());
+		BsHisComb->SetLineWidth(2);
+		BsHisComb->SetLineColor(kOrange);
+
+
+		BsHisDecay->Scale(1.0/BsHisDecay->Integral());
+		BsHisDecay->SetLineWidth(2);
+		BsHisDecay->SetLineColor(kGreen);
+
+
+
+
+		BsHisSel->Scale(1.0/BsHisSel->Integral());
+		BsHisSel->SetLineWidth(2);
+		BsHisSel->SetLineColor(kBlue);
+
+
+		BsHisAll->Draw("hist");
+		BsHisSig->Draw("histSAME");
+		BsHisSel->Draw("histSAME");
+		BsHisDecay->Draw("histSAME");
+		BsHisComb->Draw("histSAME");
+
+
+
+		Resoleg[i] = new TLegend(0.36,0.65,0.75,0.85,NULL,"brNDC");
+		Resoleg[i]->SetBorderSize(0);
+		Resoleg[i]->SetTextSize(0.040);
+		Resoleg[i]->SetTextFont(42);
+		Resoleg[i]->SetFillStyle(0);
+		Resoleg[i]->SetLineWidth(3);
+
+		Resoleg[i]->AddEntry(BsHisAll,"Signal + Background","l");
+		Resoleg[i]->AddEntry(BsHisSig,"B_{s}^{0} Signal Decay","l");
+		Resoleg[i]->AddEntry(BsHisSel,"Mass Window Selection Applied","l");
+		Resoleg[i]->AddEntry(BsHisComb,"Random Background from PV","l");
+		Resoleg[i]->AddEntry(BsHisDecay,"Inclusive PYTHIA 8 Gen B Decay","l");
+	
+
+		Resoleg[i]->Draw("SAME");
+
+		OutName = Form("PlotsInclusive/RESO/%s.png",ResoSaveName[i].Data());
+
+		c->SaveAs(OutName.Data());
+
+
+
+
+	}
 
 
 }

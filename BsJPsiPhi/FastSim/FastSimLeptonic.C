@@ -1,6 +1,7 @@
 #include "FastSimLeptonic.h"
 #include "VecBranchLeptonic.h"
-R__LOAD_LIBRARY(EvtGen/lib/libEvtGenExternal.so)
+//R__LOAD_LIBRARY(EvtGen/lib/libEvtGenExternal.so)
+R__LOAD_LIBRARY(libEvtGenExternal.so)
 
 
 void FastSimLeptonic(int NEvents){
@@ -28,6 +29,7 @@ void FastSimLeptonic(int NEvents){
 
 
 	for(int i =0; i < NEvents; i++){
+		
 
 		if(i%10000 == 0)cout << "Now Working on Event = " << i << endl;
 		Event = i;
@@ -63,12 +65,14 @@ void BackgroundSimulations(int &EventID){
 
 	if( vecPt_kp.size()  > 4 && vecPt_km.size() > 4){
 
-		cout << "nePlus = " << nePlus << "   vecPt_ep.size() = " << vecPt_ep.size() << "   vecPt_epGen.size() = " << vecPt_epGen.size() << endl;
-		cout << "neMinus = " << neMinus << "   vecPt_em.size() = " << vecPt_em.size() << "   vecPt_emGen.size() = " << vecPt_emGen.size() << endl;
+	//	cout << "nePlus = " << nePlus << "   vecPt_ep.size() = " << vecPt_ep.size() << "   vecPt_epGen.size() = " << vecPt_epGen.size() << endl;
+	//	cout << "neMinus = " << neMinus << "   vecPt_em.size() = " << vecPt_em.size() << "   vecPt_emGen.size() = " << vecPt_emGen.size() << endl;
 
-		cout << "nKPlus = " << nKPlus << "   vecPt_Kp.size() = " << vecPt_kp.size() << "   vecPt_kpGen.size() = " << vecPt_kpGen.size() << endl;
-		cout << "nKMinus = " << nKMinus << "   vecPt_Km.size() = " << vecPt_km.size() << "   vecPt_kmGen.size() = " << vecPt_kmGen.size() << endl;
+	//	cout << "nKPlus = " << nKPlus << "   nPiPlus = " <<  nPiPlus << "   nPPlus = " <<  nPPlus  << "   vecPt_Kp.size() = " << vecPt_kp.size() << "   vecPt_kpGen.size() = " << vecPt_kpGen.size() << endl;
+	//	cout << "nKMinus = " << nKMinus << "   nPiMinus = " <<  nPiMinus << "   nPMinus = " <<  nPMinus  << "   vecPt_Km.size() = " << vecPt_km.size() << "   vecPt_kmGen.size() = " << vecPt_kmGen.size() << endl;
 
+		cout << "nePlus = " << nePlusGen << "  nKPlus = " << nKPlus << "   nPiPlus = " << nPiPlus <<   "  nPPlus = "  <<  nPPlus <<  "  vecPt_ep.size() = " << vecPt_ep.size() << "   vecPt_epGen.size()  " << vecPt_epGen.size() << "  nePlus = " << nePlus << endl; 
+		cout << "nePlusComb =  " << nePlusComb << "   nePlusDecay = " << nePlusDecay <<  "  nePlusSig = " << nePlusSig << "  vecPt_epGen =  " << vecPt_epGen.size() <<  "  vecPt_ep.size() = " << vecPt_ep.size() << endl; 
 	}
 
 	outFile->cd();
@@ -359,23 +363,30 @@ void GenerateBackground( int &EventID){
 
 	nePlus = gRandom->Integer(MaxPlus);
 	nKPlus = gRandom->Integer(MaxMinus);
+	nPiPlus = gRandom->Integer(MaxMinus);
+	nPPlus = gRandom->Integer(MaxProton);
 
+	nePlusGen = nePlus;
 
 
 
 	neMinus = nePlus;
 	nKMinus = nKPlus;
+	nPiMinus = nPiPlus;
+	nPMinus = nPPlus;
 
-	nPlus = nePlus + nKPlus;
-	nMinus = neMinus + nKMinus;
 
-//	cout << "nPlus = " << nPlus << "    nKaons = " << nMinus << endl;
+
+	nPlus = nKPlus + nPiPlus + nPPlus + nePlus;
+	nMinus = nKMinus + nPiMinus + nPMinus + neMinus;
+
+	cout << "nPlus = " << nPlus << "    nMinus = " << nMinus << endl;
 
 	cout << "neMinus = " << neMinus << "   nePlus = " << nePlus << "  nKMinus =  " << nKMinus << "  nKPlus =  " << nKPlus << endl; 
 	Pos.SetXYZ(0,0,0);
 
 
-
+	nePlusComb = 0;
 	//Assuming e+ = e-//
 
 	//e+ Loop
@@ -387,6 +398,8 @@ void GenerateBackground( int &EventID){
 		float phi = gRandom->Uniform(-PI,PI);
 		FourMom.SetPtEtaPhiM(pt, eta , phi, M_ELECTRON_PLUS);
 		float rcdca = dca(FourMom.Vect(), Pos, vertex);
+		nePlusComb = nePlusComb + 1;
+
 
 		vecTrackID_epGen.push_back(ipi);
 		vecDCA_epGen.push_back(rcdca);   	
@@ -417,7 +430,7 @@ void GenerateBackground( int &EventID){
 		rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 		if(rcdca < DCATrackCut) continue;
 		RANDOMID = 	((double)rand() / (double)(RAND_MAX));
-		EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+//		EIDProb = EIDRejK->Eval(rcFourMom.Perp());
 		if(RANDOMID > EIDProb) continue;
 	
 		//Identify as Pi+//
@@ -484,7 +497,7 @@ void GenerateBackground( int &EventID){
 		rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 		if(rcdca < DCATrackCut) continue;
 		RANDOMID = 	((double)rand() / (double)(RAND_MAX));
-		EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+//		EIDProb = EIDRejK->Eval(rcFourMom.Perp());
 		if(RANDOMID > EIDProb) continue;
 
 		//Identify as Pi-//
@@ -522,6 +535,7 @@ void GenerateBackground( int &EventID){
 		float phi = gRandom->Uniform(-PI,PI);
 		FourMom.SetPtEtaPhiM(pt, eta , phi, M_KAON_PLUS);	
 		float rcdca = dca(FourMom.Vect(), Pos, vertex);
+		nePlusComb = nePlusComb + 1;
 
 		/*
 		vecTrackID_epGen.push_back(ik+nePlus);
@@ -544,12 +558,27 @@ void GenerateBackground( int &EventID){
 		vecBottom_kpGen.push_back(0); 
 
 
+		//For the moment No leakage to e in Gen//
+
+		
+		vecTrackID_epGen.push_back(ik);
+		vecDCA_epGen.push_back(rcdca);               
+		vecPt_epGen.push_back(pt);
+		vecEta_epGen.push_back(eta);
+		vecPhi_epGen.push_back(phi);
+		vecPos_epGen.push_back(Pos);
+		vecType_epGen.push_back(0);
+		vecBottom_epGen.push_back(0); 
+		
+
+
 		rcFourMom = smearMom(FourMom,fKaonMomResolution);
 		if (rcFourMom.Perp()<minPtCut) continue;
 		rcPos = smearPosData(1, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
 	    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 		if(rcdca < DCATrackCut) continue;
 
+		
 		/*
 		//Identify as Pi+//
 		vecTrackID_ep.push_back(ik+nePlus);
@@ -574,6 +603,21 @@ void GenerateBackground( int &EventID){
 		vecBottom_kp.push_back(0); 
 
 
+		RANDOMID = 	((double)rand() / (double)(RAND_MAX));
+		EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+		if(RANDOMID > EIDProb) continue;
+
+		vecTrackID_ep.push_back(ik);
+		vecDCA_ep.push_back(rcdca);               
+		vecPt_ep.push_back(rcFourMom.Perp());
+		vecEta_ep.push_back(rcFourMom.Eta());
+		vecPhi_ep.push_back(rcFourMom.Phi());
+		vecPos_ep.push_back(rcPos);
+		vecType_ep.push_back(0);
+		vecBottom_ep.push_back(0); 
+
+
+
 	}
 
 
@@ -585,16 +629,9 @@ void GenerateBackground( int &EventID){
 		FourMom.SetPtEtaPhiM(pt, eta , phi, M_KAON_MINUS);
 		float rcdca = dca(FourMom.Vect(), Pos, vertex);
 			
-		/*
-		vecTrackID_emGen.push_back(ik+neMinus);
-		vecDCA_emGen.push_back(rcdca);   	
-		vecPt_emGen.push_back(pt);
-		vecEta_emGen.push_back(eta);
-		vecPhi_emGen.push_back(phi);
-		vecPos_emGen.push_back(Pos);
-		vecType_emGen.push_back(0);
-		vecBottom_emGen.push_back(0); 
-		*/
+		
+
+		
 
 		vecTrackID_kmGen.push_back(ik);
 		vecDCA_kmGen.push_back(rcdca);               
@@ -605,11 +642,27 @@ void GenerateBackground( int &EventID){
 		vecType_kmGen.push_back(0);
 		vecBottom_kmGen.push_back(0); 
 
+		//For the moment No leakage to e in Gen//
+
+	
+		vecTrackID_emGen.push_back(ik);
+		vecDCA_emGen.push_back(rcdca);               
+		vecPt_emGen.push_back(pt);
+		vecEta_emGen.push_back(eta);
+		vecPhi_emGen.push_back(phi);
+		vecPos_emGen.push_back(Pos);
+		vecType_emGen.push_back(0);
+		vecBottom_emGen.push_back(0); 
+		
+
+
 		rcFourMom = smearMom(FourMom,fKaonMomResolution);
 		if (rcFourMom.Perp()<minPtCut) continue;
 		rcPos = smearPosData(1, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
 	    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 		if(rcdca < DCATrackCut) continue;
+
+		
 		/*
 		//Identify as Pi-//
 		vecTrackID_em.push_back(ik+neMinus);
@@ -634,31 +687,380 @@ void GenerateBackground( int &EventID){
 		vecBottom_km.push_back(0); 
 
 
+		RANDOMID = 	((double)rand() / (double)(RAND_MAX));
+		EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+		if(RANDOMID > EIDProb) continue;
+
+		vecTrackID_em.push_back(ik);
+		vecDCA_em.push_back(rcdca);               
+		vecPt_em.push_back(rcFourMom.Perp());
+		vecEta_em.push_back(rcFourMom.Eta());
+		vecPhi_em.push_back(rcFourMom.Phi());
+		vecPos_em.push_back(rcPos);
+		vecType_em.push_back(0);
+		vecBottom_em.push_back(0); 
+
+
 	}
 
 
-	/*
-	   for(int ik=0; ik<nKaons; ik++) {
-	   float pt = hkPtWg->GetRandom();//gRandom->Uniform(0.6,20);
-	   float eta = gRandom->Uniform(-1,1);
-	   float phi = gRandom->Uniform(-PI,PI);
-	   FourMom.SetPtEtaPhiM(pt, eta , phi, M_KAON_MINUS);
-	   rcFourMom = smearMom(FourMom,fKaonMomResolution);
-	   if (rcFourMom.Perp()<minPtCut) continue;
-	   rcPos = smearPosData(1, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
-	   float rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
-	   if(rcdca < DCATrackCut) continue;
-	   vecDCA_km.push_back(rcdca);               
-	   vecPt_km.push_back(rcFourMom.Perp());
-	   vecEta_km.push_back(rcFourMom.Eta());
-	   vecPhi_km.push_back(rcFourMom.Phi());
-	   vecPos_km.push_back(rcPos);
-	   vecType_km.push_back(1);
-	   vecBottom_km.push_back(0); 
+	//Pi+ Loop
+	for(int ipi=0; ipi<nPiPlus; ipi++) {
+		float pt = hpiPtWg->GetRandom();//gRandom->Uniform(0.6,20);
+		float eta = gRandom->Uniform(-1,1);
+		float phi = gRandom->Uniform(-PI,PI);
+		FourMom.SetPtEtaPhiM(pt, eta , phi, M_PION_PLUS);	
+		float rcdca = dca(FourMom.Vect(), Pos, vertex);
+		nePlusComb = nePlusComb + 1;
 
-	   }
+		/*
+		vecTrackID_epGen.push_back(ik+nePlus);
+		vecDCA_epGen.push_back(rcdca);   	
+		vecPt_epGen.push_back(pt);
+		vecEta_epGen.push_back(eta);
+		vecPhi_epGen.push_back(phi);
+		vecPos_epGen.push_back(Pos);
+		vecType_epGen.push_back(0);
+		vecBottom_epGen.push_back(0); 
+		*/
 
-*/
+		vecTrackID_kpGen.push_back(ipi);
+		vecDCA_kpGen.push_back(rcdca);               
+		vecPt_kpGen.push_back(pt);
+		vecEta_kpGen.push_back(eta);
+		vecPhi_kpGen.push_back(phi);
+		vecPos_kpGen.push_back(Pos);
+		vecType_kpGen.push_back(0);
+		vecBottom_kpGen.push_back(0); 
+
+
+		//For the moment No leakage to e in Gen//
+		
+		vecTrackID_epGen.push_back(ipi);
+		vecDCA_epGen.push_back(rcdca);               
+		vecPt_epGen.push_back(pt);
+		vecEta_epGen.push_back(eta);
+		vecPhi_epGen.push_back(phi);
+		vecPos_epGen.push_back(Pos);
+		vecType_epGen.push_back(0);
+		vecBottom_epGen.push_back(0); 
+		
+
+		rcFourMom = smearMom(FourMom,fPionMomResolution);
+		if (rcFourMom.Perp()<minPtCut) continue;
+		rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+	    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+		if(rcdca < DCATrackCut) continue;
+
+	
+		/*
+		//Identify as Pi+//
+		vecTrackID_ep.push_back(ik+nePlus);
+		vecDCA_ep.push_back(rcdca);               
+		vecPt_ep.push_back(rcFourMom.Perp());
+		vecEta_ep.push_back(rcFourMom.Eta());
+		vecPhi_ep.push_back(rcFourMom.Phi());
+		vecPos_ep.push_back(rcPos);
+		vecType_ep.push_back(0);
+		vecBottom_ep.push_back(0); 
+		*/
+
+		//Identify as K+//
+
+		vecTrackID_kp.push_back(ipi);
+		vecDCA_kp.push_back(rcdca);               
+		vecPt_kp.push_back(rcFourMom.Perp());
+		vecEta_kp.push_back(rcFourMom.Eta());
+		vecPhi_kp.push_back(rcFourMom.Phi());
+		vecPos_kp.push_back(rcPos);
+		vecType_kp.push_back(0);
+		vecBottom_kp.push_back(0); 
+
+
+		RANDOMID = 	((double)rand() / (double)(RAND_MAX));
+		EIDProb = EIDRejPi->Eval(rcFourMom.Perp());
+		if(RANDOMID > EIDProb) continue;
+
+		vecTrackID_ep.push_back(ipi);
+		vecDCA_ep.push_back(rcdca);               
+		vecPt_ep.push_back(rcFourMom.Perp());
+		vecEta_ep.push_back(rcFourMom.Eta());
+		vecPhi_ep.push_back(rcFourMom.Phi());
+		vecPos_ep.push_back(rcPos);
+		vecType_ep.push_back(0);
+		vecBottom_ep.push_back(0); 
+
+
+
+	}
+
+
+	//Pi- Loop
+	for(int ipi=0; ipi<nPiMinus; ipi++) {
+		float pt = hpiPtWg->GetRandom();//gRandom->Uniform(0.6,20);
+		float eta = gRandom->Uniform(-1,1);
+		float phi = gRandom->Uniform(-PI,PI);
+		FourMom.SetPtEtaPhiM(pt, eta , phi, M_PION_MINUS);
+		float rcdca = dca(FourMom.Vect(), Pos, vertex);
+			
+		/*
+		vecTrackID_emGen.push_back(ik+neMinus);
+		vecDCA_emGen.push_back(rcdca);   	
+		vecPt_emGen.push_back(pt);
+		vecEta_emGen.push_back(eta);
+		vecPhi_emGen.push_back(phi);
+		vecPos_emGen.push_back(Pos);
+		vecType_emGen.push_back(0);
+		vecBottom_emGen.push_back(0); 
+		*/
+
+		vecTrackID_kmGen.push_back(ipi);
+		vecDCA_kmGen.push_back(rcdca);               
+		vecPt_kmGen.push_back(pt);
+		vecEta_kmGen.push_back(eta);
+		vecPhi_kmGen.push_back(phi);
+		vecPos_kmGen.push_back(Pos);
+		vecType_kmGen.push_back(0);
+		vecBottom_kmGen.push_back(0); 
+
+		//For the moment No leakage to e in Gen//
+		
+		vecTrackID_emGen.push_back(ipi);
+		vecDCA_emGen.push_back(rcdca);               
+		vecPt_emGen.push_back(pt);
+		vecEta_emGen.push_back(eta);
+		vecPhi_emGen.push_back(phi);
+		vecPos_emGen.push_back(Pos);
+		vecType_emGen.push_back(0);
+		vecBottom_emGen.push_back(0); 
+		
+
+
+		rcFourMom = smearMom(FourMom,fPionMomResolution);
+		if (rcFourMom.Perp()<minPtCut) continue;
+		rcPos = smearPosData(0, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+	    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+		if(rcdca < DCATrackCut) continue;
+
+		
+		/*
+		//Identify as Pi-//
+		vecTrackID_em.push_back(ik+neMinus);
+		vecDCA_em.push_back(rcdca);               
+		vecPt_em.push_back(rcFourMom.Perp());
+		vecEta_em.push_back(rcFourMom.Eta());
+		vecPhi_em.push_back(rcFourMom.Phi());
+		vecPos_em.push_back(rcPos);
+		vecType_em.push_back(0);
+		vecBottom_em.push_back(0); 
+		*/
+
+		//Identify as K-//
+
+		vecTrackID_km.push_back(ipi);
+		vecDCA_km.push_back(rcdca);               
+		vecPt_km.push_back(rcFourMom.Perp());
+		vecEta_km.push_back(rcFourMom.Eta());
+		vecPhi_km.push_back(rcFourMom.Phi());
+		vecPos_km.push_back(rcPos);
+		vecType_km.push_back(0);
+		vecBottom_km.push_back(0); 
+
+
+		RANDOMID = 	((double)rand() / (double)(RAND_MAX));
+		EIDProb = EIDRejPi->Eval(rcFourMom.Perp());
+		if(RANDOMID > EIDProb) continue;
+
+		vecTrackID_em.push_back(ipi);
+		vecDCA_em.push_back(rcdca);               
+		vecPt_em.push_back(rcFourMom.Perp());
+		vecEta_em.push_back(rcFourMom.Eta());
+		vecPhi_em.push_back(rcFourMom.Phi());
+		vecPos_em.push_back(rcPos);
+		vecType_em.push_back(0);
+		vecBottom_em.push_back(0); 
+
+
+	}
+
+
+
+	//Proton+ Loop
+	for(int ip=0; ip<nPPlus; ip++) {
+		float pt = hpPtWg->GetRandom();//gRandom->Uniform(0.6,20);
+		float eta = gRandom->Uniform(-1,1);
+		float phi = gRandom->Uniform(-PI,PI);
+		FourMom.SetPtEtaPhiM(pt, eta , phi, M_PROTON_PLUS);	
+		float rcdca = dca(FourMom.Vect(), Pos, vertex);
+		nePlusComb = nePlusComb + 1;
+
+		/*
+		vecTrackID_epGen.push_back(ik+nePlus);
+		vecDCA_epGen.push_back(rcdca);   	
+		vecPt_epGen.push_back(pt);
+		vecEta_epGen.push_back(eta);
+		vecPhi_epGen.push_back(phi);
+		vecPos_epGen.push_back(Pos);
+		vecType_epGen.push_back(0);
+		vecBottom_epGen.push_back(0); 
+		*/
+
+		vecTrackID_kpGen.push_back(ip);
+		vecDCA_kpGen.push_back(rcdca);               
+		vecPt_kpGen.push_back(pt);
+		vecEta_kpGen.push_back(eta);
+		vecPhi_kpGen.push_back(phi);
+		vecPos_kpGen.push_back(Pos);
+		vecType_kpGen.push_back(0);
+		vecBottom_kpGen.push_back(0); 
+
+		//For the moment No leakage to e in Gen//
+
+		
+		vecTrackID_epGen.push_back(ip);
+		vecDCA_epGen.push_back(rcdca);               
+		vecPt_epGen.push_back(pt);
+		vecEta_epGen.push_back(eta);
+		vecPhi_epGen.push_back(phi);
+		vecPos_epGen.push_back(Pos);
+		vecType_epGen.push_back(0);
+		vecBottom_epGen.push_back(0); 
+		
+
+		rcFourMom = smearMom(FourMom,fProtonMomResolution);
+		if (rcFourMom.Perp()<minPtCut) continue;
+		rcPos = smearPosData(2, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+	    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+		if(rcdca < DCATrackCut) continue;
+
+	
+		/*
+		//Identify as Pi+//
+		vecTrackID_ep.push_back(ik+nePlus);
+		vecDCA_ep.push_back(rcdca);               
+		vecPt_ep.push_back(rcFourMom.Perp());
+		vecEta_ep.push_back(rcFourMom.Eta());
+		vecPhi_ep.push_back(rcFourMom.Phi());
+		vecPos_ep.push_back(rcPos);
+		vecType_ep.push_back(0);
+		vecBottom_ep.push_back(0); 
+		*/
+
+		//Identify as K+//
+
+		vecTrackID_kp.push_back(ip);
+		vecDCA_kp.push_back(rcdca);               
+		vecPt_kp.push_back(rcFourMom.Perp());
+		vecEta_kp.push_back(rcFourMom.Eta());
+		vecPhi_kp.push_back(rcFourMom.Phi());
+		vecPos_kp.push_back(rcPos);
+		vecType_kp.push_back(0);
+		vecBottom_kp.push_back(0); 
+
+
+		RANDOMID = 	((double)rand() / (double)(RAND_MAX));
+		EIDProb = EIDRejP->Eval(rcFourMom.Perp());
+		if(RANDOMID > EIDProb) continue;
+
+		vecTrackID_ep.push_back(ip);
+		vecDCA_ep.push_back(rcdca);               
+		vecPt_ep.push_back(rcFourMom.Perp());
+		vecEta_ep.push_back(rcFourMom.Eta());
+		vecPhi_ep.push_back(rcFourMom.Phi());
+		vecPos_ep.push_back(rcPos);
+		vecType_ep.push_back(0);
+		vecBottom_ep.push_back(0); 
+
+
+
+	}
+
+
+	//Proton - Loop
+	for(int ip=0; ip<nPMinus; ip++) {
+		float pt = hpPtWg->GetRandom();//gRandom->Uniform(0.6,20);
+		float eta = gRandom->Uniform(-1,1);
+		float phi = gRandom->Uniform(-PI,PI);
+		FourMom.SetPtEtaPhiM(pt, eta , phi, M_PROTON_MINUS);
+		float rcdca = dca(FourMom.Vect(), Pos, vertex);
+			
+		/*
+		vecTrackID_emGen.push_back(ik+neMinus);
+		vecDCA_emGen.push_back(rcdca);   	
+		vecPt_emGen.push_back(pt);
+		vecEta_emGen.push_back(eta);
+		vecPhi_emGen.push_back(phi);
+		vecPos_emGen.push_back(Pos);
+		vecType_emGen.push_back(0);
+		vecBottom_emGen.push_back(0); 
+		*/
+
+		vecTrackID_kmGen.push_back(ip);
+		vecDCA_kmGen.push_back(rcdca);               
+		vecPt_kmGen.push_back(pt);
+		vecEta_kmGen.push_back(eta);
+		vecPhi_kmGen.push_back(phi);
+		vecPos_kmGen.push_back(Pos);
+		vecType_kmGen.push_back(0);
+		vecBottom_kmGen.push_back(0); 
+
+		//For the moment No leakage to e in Gen//
+		
+		vecTrackID_emGen.push_back(ip);
+		vecDCA_emGen.push_back(rcdca);               
+		vecPt_emGen.push_back(pt);
+		vecEta_emGen.push_back(eta);
+		vecPhi_emGen.push_back(phi);
+		vecPos_emGen.push_back(Pos);
+		vecType_emGen.push_back(0);
+		vecBottom_emGen.push_back(0); 
+		
+		rcFourMom = smearMom(FourMom,fProtonMomResolution);
+		if (rcFourMom.Perp()<minPtCut) continue;
+		rcPos = smearPosData(2, 0, 7, rcFourMom, Pos); //1--kaon 0--pi
+	    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
+		if(rcdca < DCATrackCut) continue;
+
+		
+		/*
+		//Identify as Pi-//
+		vecTrackID_em.push_back(ik+neMinus);
+		vecDCA_em.push_back(rcdca);               
+		vecPt_em.push_back(rcFourMom.Perp());
+		vecEta_em.push_back(rcFourMom.Eta());
+		vecPhi_em.push_back(rcFourMom.Phi());
+		vecPos_em.push_back(rcPos);
+		vecType_em.push_back(0);
+		vecBottom_em.push_back(0); 
+		*/
+
+		//Identify as K-//
+
+		vecTrackID_km.push_back(ip);
+		vecDCA_km.push_back(rcdca);               
+		vecPt_km.push_back(rcFourMom.Perp());
+		vecEta_km.push_back(rcFourMom.Eta());
+		vecPhi_km.push_back(rcFourMom.Phi());
+		vecPos_km.push_back(rcPos);
+		vecType_km.push_back(0);
+		vecBottom_km.push_back(0); 
+
+
+		RANDOMID = 	((double)rand() / (double)(RAND_MAX));
+		EIDProb = EIDRejP->Eval(rcFourMom.Perp());
+		if(RANDOMID > EIDProb) continue;
+
+		vecTrackID_em.push_back(ip);
+		vecDCA_em.push_back(rcdca);               
+		vecPt_em.push_back(rcFourMom.Perp());
+		vecEta_em.push_back(rcFourMom.Eta());
+		vecPhi_em.push_back(rcFourMom.Phi());
+		vecPos_em.push_back(rcPos);
+		vecType_em.push_back(0);
+		vecBottom_em.push_back(0); 
+
+
+	}
 
 
 
@@ -682,6 +1084,8 @@ void GenerateDecay(int & EventID){
 
 
 
+	
+	nePlusDecay = 0;
 	for(int i = 0; i < EventSize; i++){
 		if(!pythia8.event[i].isFinal()){
 			//cout << "SUCK BRO" << endl;
@@ -702,11 +1106,10 @@ void GenerateDecay(int & EventID){
 		Pos.SetXYZ(vx*1000,vy*1000,vz*1000);
 
 
-
 		//	cout << "particle i = " << i << "   PDG ID = " << TMath::Abs(pythia8.event[i].id()) << endl;
 
 
-		if (abs(id)!=321 && abs(id)!=11) continue;
+		//if (abs(id)!=321 && abs(id)!=11) continue;
 		//e+
 		if(id == 11) {
 
@@ -716,6 +1119,10 @@ void GenerateDecay(int & EventID){
 			float rcdca = dca(FourMom.Vect(), Pos, vertex);
 			if(rcdca < DCATrackCut) continue;
 
+
+
+			nePlus = nePlus + 1;
+			nePlusDecay = nePlusDecay + 1;
 
 			vecTrackID_epGen.push_back(nePlus);
 			vecDCA_epGen.push_back(rcdca);               
@@ -737,8 +1144,8 @@ void GenerateDecay(int & EventID){
 			if (rcFourMom.Perp()<minPtCut) continue;
 		    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 			RANDOMID = 	((double)rand() / (double)(RAND_MAX));
-			EIDProb = EIDRejK->Eval(rcFourMom.Perp());
-			if(RANDOMID > EIDProb) continue;
+			//EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+			if(RANDOMID > EIDProb) continue;  //Efficiency
 
 			vecTrackID_ep.push_back(nePlus);
 			vecDCA_ep.push_back(rcdca);               
@@ -748,53 +1155,104 @@ void GenerateDecay(int & EventID){
 			vecPos_ep.push_back(rcPos);
 			vecType_ep.push_back(3);
 			vecBottom_ep.push_back(1); 
-
-
-			nePlus = nePlus + 1;
 		}
 
 
 
 		//K+
-		if(id == 321) {
+		if(id == 321 || id == 211 || id == 2212) {
 
 			//cout << "K+/Pi+ Recorded!!" << endl;
 
-			FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_PLUS);
+			if(id == 321) FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_PLUS);
+			if(id == 211) FourMom.SetPtEtaPhiM(pt,eta,phi, M_PION_PLUS);
+			if(id == 2212) FourMom.SetPtEtaPhiM(pt,eta,phi, M_PROTON_PLUS);
+
+
 			float rcdca = dca(FourMom.Vect(), Pos, vertex);
 			if(rcdca < DCATrackCut) continue;
 
 
-			vecTrackID_kpGen.push_back(nKPlus);
+			vecTrackID_kpGen.push_back(nPlus);
 			vecDCA_kpGen.push_back(rcdca);               
 			vecPt_kpGen.push_back(FourMom.Perp());
 			vecEta_kpGen.push_back(FourMom.Eta());
 			vecPhi_kpGen.push_back(FourMom.Phi());
 			vecPos_kpGen.push_back(Pos);
-			vecType_kpGen.push_back(3);
+			if(id == 321)	vecType_kpGen.push_back(3);
+			if(id == 211)	vecType_kpGen.push_back(4);
+			if(id == 2212)	vecType_kpGen.push_back(4);
+
 			vecBottom_kpGen.push_back(1); 
 
+			nPlus = nPlus + 1;
+			nePlus = nePlus + 1;
+			nePlusDecay = nePlusDecay + 1;
 
-			FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_PLUS);
-			rcFourMom = smearMom(FourMom,fKaonMomResolution);
-			rcPos = smearPosData(1, 0, 7, rcFourMom, Pos);
-			
+			//For the moment No leakage to e in Gen//
+	
+			vecTrackID_epGen.push_back(nePlus);
+			vecDCA_epGen.push_back(rcdca);               
+			vecPt_epGen.push_back(pt);
+			vecEta_epGen.push_back(eta);
+			vecPhi_epGen.push_back(phi);
+			vecPos_epGen.push_back(Pos);
+			vecType_epGen.push_back(5);
+			vecBottom_epGen.push_back(1); 
+
+			if(id == 321){
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_PLUS);
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+				rcPos = smearPosData(1, 0, 7, rcFourMom, Pos);
+			}
+
+			if(id == 211){
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_PION_PLUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+				rcPos = smearPosData(0, 0, 7, rcFourMom, Pos);
+			}
+
+			if(id == 2212){
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_PROTON_PLUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+				rcPos = smearPosData(2, 0, 7, rcFourMom, Pos);
+			}
+
 
 			if (rcFourMom.Perp()<minPtCut) continue;
 		    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 
 
-			vecTrackID_kp.push_back(nKPlus);
+			vecTrackID_kp.push_back(nPlus);
 			vecDCA_kp.push_back(rcdca);               
 			vecPt_kp.push_back(rcFourMom.Perp());
 			vecEta_kp.push_back(rcFourMom.Eta());
 			vecPhi_kp.push_back(rcFourMom.Phi());
 			vecPos_kp.push_back(rcPos);
-			vecType_kp.push_back(3);
+			if(id == 321)	vecType_kp.push_back(3);
+			if(id == 211)   vecType_kp.push_back(4);
+			if(id == 2212)   vecType_kp.push_back(4);
 			vecBottom_kp.push_back(1); 
 
+			if(id == 321) EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+			if(id == 211) EIDProb = EIDRejPi->Eval(rcFourMom.Perp());
+			if(id == 2212) EIDProb = EIDRejP->Eval(rcFourMom.Perp());
+			RANDOMID = 	((double)rand() / (double)(RAND_MAX));
 
-			nKPlus = nKPlus + 1;
+			if(RANDOMID > EIDProb) continue;  //Efficiency
+
+			vecTrackID_ep.push_back(nePlus);
+			vecDCA_ep.push_back(rcdca);               
+			vecPt_ep.push_back(rcFourMom.Perp());
+			vecEta_ep.push_back(rcFourMom.Eta());
+			vecPhi_ep.push_back(rcFourMom.Phi());
+			vecPos_ep.push_back(rcPos);
+			vecType_ep.push_back(5);
+			vecBottom_ep.push_back(1); 
+
+
+
+
 		}
 
 
@@ -830,7 +1288,7 @@ void GenerateDecay(int & EventID){
 			if (rcFourMom.Perp()<minPtCut) continue;
 		    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 			RANDOMID = 	((double)rand() / (double)(RAND_MAX));
-			EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+	//		EIDProb = EIDRejK->Eval(rcFourMom.Perp());
 			if(RANDOMID > EIDProb) continue;
 
 			vecTrackID_em.push_back(neMinus);
@@ -849,37 +1307,71 @@ void GenerateDecay(int & EventID){
 
 		//K-
 
-		if(id == -321) {
+		if(id == -321 || id == -211 || id == -2212) {
 
 			//		cout << "K-/Pi- Recorded!!" << endl;
 
-			FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_MINUS);
+
+			if(id == -321) FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_MINUS);
+			if(id == -211) FourMom.SetPtEtaPhiM(pt,eta,phi, M_PION_MINUS);
+			if(id == -2212) FourMom.SetPtEtaPhiM(pt,eta,phi, M_PROTON_MINUS);
+	
 			float rcdca = dca(FourMom.Vect(), Pos, vertex);
 			if(rcdca < DCATrackCut) continue;
 
 
-			vecTrackID_kmGen.push_back(nKMinus);
+			vecTrackID_kmGen.push_back(nMinus);
 			vecDCA_kmGen.push_back(rcdca);               
 			vecPt_kmGen.push_back(FourMom.Perp());
 			vecEta_kmGen.push_back(FourMom.Eta());
 			vecPhi_kmGen.push_back(FourMom.Phi());
 			vecPos_kmGen.push_back(Pos);
-			vecType_kmGen.push_back(3);
+
+			if(id == -321)	vecType_kmGen.push_back(3);
+			if(id == -211)	vecType_kmGen.push_back(4);
+			if(id == -2212)	vecType_kmGen.push_back(4);
 			vecBottom_kmGen.push_back(1); 
 
-
-			FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_MINUS);
-			rcFourMom = smearMom(FourMom,fKaonMomResolution);
-			rcPos = smearPosData(1, 0, 7, rcFourMom, Pos);
-
 			
+
+			//For the moment No leakage to e in Gen//
+	
+			vecTrackID_emGen.push_back(neMinus);
+			vecDCA_emGen.push_back(rcdca);               
+			vecPt_emGen.push_back(pt);
+			vecEta_emGen.push_back(eta);
+			vecPhi_emGen.push_back(phi);
+			vecPos_emGen.push_back(Pos);
+			vecType_emGen.push_back(5);
+			vecBottom_emGen.push_back(1); 
+
+
+			if(id == -321){
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_KAON_MINUS);
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+				rcPos = smearPosData(1, 0, 7, rcFourMom, Pos);
+			}
+		
+			if(id == -211){
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_PION_MINUS);
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+				rcPos = smearPosData(0, 0, 7, rcFourMom, Pos);
+			}
+
+
+			if(id == -2212){
+				FourMom.SetPtEtaPhiM(pt,eta,phi, M_PROTON_MINUS);
+				rcFourMom = smearMom(FourMom,fProtonMomResolution);
+				rcPos = smearPosData(2, 0, 7, rcFourMom, Pos);
+			}
+
 			if (rcFourMom.Perp()<minPtCut) continue;
 
 
 		    rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 
 
-			vecTrackID_km.push_back(nKMinus);
+			vecTrackID_km.push_back(nMinus);
 			vecDCA_km.push_back(rcdca);               
 			vecPt_km.push_back(rcFourMom.Perp());
 			vecEta_km.push_back(rcFourMom.Eta());
@@ -889,7 +1381,24 @@ void GenerateDecay(int & EventID){
 			vecBottom_km.push_back(1); 
 
 
-			nKMinus = nKMinus + 1;
+			if(id == -321) EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+			if(id == -211) EIDProb = EIDRejPi->Eval(rcFourMom.Perp());
+			if(id == -2212) EIDProb = EIDRejP->Eval(rcFourMom.Perp());
+			RANDOMID = 	((double)rand() / (double)(RAND_MAX));
+
+			if(RANDOMID > EIDProb) continue;  //Efficiency
+
+			vecTrackID_em.push_back(neMinus);
+			vecDCA_em.push_back(rcdca);               
+			vecPt_em.push_back(rcFourMom.Perp());
+			vecEta_em.push_back(rcFourMom.Eta());
+			vecPhi_em.push_back(rcFourMom.Phi());
+			vecPos_em.push_back(rcPos);
+			vecType_em.push_back(5);
+			vecBottom_em.push_back(1); 
+
+			nMinus = nMinus + 1;
+			neMinus = neMinus + 1;
 		}
 
 
@@ -1146,6 +1655,7 @@ void GenerateEvtGen(int & EventID){
 	int nTrk = daughters.GetEntriesFast();
 
 
+	nePlusSig = 0;
 
 
 	for (int iTrk = 0; iTrk < nTrk; ++iTrk)
@@ -1175,6 +1685,11 @@ void GenerateEvtGen(int & EventID){
 			vecType_epGen.push_back(1);
 			vecBottom_epGen.push_back(1); 
 	
+			
+			nPlus = nPlus + 1;
+			nePlus = nePlus + 1;
+			nePlusSig = nePlusSig + 1;
+
 
 			//Kaon Rejected//
 			/*
@@ -1195,7 +1710,7 @@ void GenerateEvtGen(int & EventID){
 			rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 			if(rcdca < DCATrackCut) continue;
 			RANDOMID = 	((double)rand() / (double)(RAND_MAX));
-			EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+//			EIDProb = EIDRejK->Eval(rcFourMom.Perp());
 			//cout << "RANDOMID = " << RANDOMID <<  "    EIDProb = " << EIDProb << endl;
 			if(RANDOMID > EIDProb) continue;
 			//	cout << "Pass 4" << endl;
@@ -1213,42 +1728,93 @@ void GenerateEvtGen(int & EventID){
 			vecBottom_ep.push_back(1); 
 
 
-
-			nePlus = nePlus + 1;
 		}
 
-		if(id == 321) {
+		if(id == 321 || id == 211 || id == 2212) {
 		
 			float rcdca = dca(FourMom.Vect(), rcPosSig, vertex);
-			vecTrackID_kpGen.push_back(nKPlus);
+			vecTrackID_kpGen.push_back(nPlus);
 			vecDCA_kpGen.push_back(rcdca);               
 			vecPt_kpGen.push_back(FourMom.Perp());
 			vecEta_kpGen.push_back(FourMom.Eta());
 			vecPhi_kpGen.push_back(FourMom.Phi());
 			vecPos_kpGen.push_back(rcPosSig);
-			vecType_kpGen.push_back(1);
+			if(id == 321) vecType_kpGen.push_back(1);
+			if(id == 211) vecType_kpGen.push_back(6);
+			if(id == 2212) vecType_kpGen.push_back(6);
+
 			vecBottom_kpGen.push_back(1); 
 			
 
-			rcFourMom = smearMom(FourMom,fKaonMomResolution);
-			rcPos = smearPosData(1, 0, 7, rcFourMom, rcPosSig);
+			//Leakage into the e+//
+
+			vecTrackID_epGen.push_back(nePlus);
+			vecDCA_epGen.push_back(rcdca);               
+			vecPt_epGen.push_back(rcFourMom.Perp());
+			vecEta_epGen.push_back(rcFourMom.Eta());
+			vecPhi_epGen.push_back(rcFourMom.Phi());
+			vecPos_epGen.push_back(rcPos);
+			vecType_epGen.push_back(5);
+			vecBottom_epGen.push_back(1); 
+					
+			nPlus = nPlus + 1;
+			nePlus = nePlus + 1;
+			nePlusSig = nePlusSig + 1;
+
+
+			if(id == 321){
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+				rcPos = smearPosData(1, 0, 7, rcFourMom, rcPosSig);
+			}
+			if(id == 211){
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+				rcPos = smearPosData(0, 0, 7, rcFourMom, rcPosSig);
+			}
+			if(id == 2212){
+				rcFourMom = smearMom(FourMom,fProtonMomResolution);
+				rcPos = smearPosData(2, 0, 7, rcFourMom, rcPosSig);
+			}
+
+
+
 			if (rcFourMom.Perp()<minPtCut) continue;
 			rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 			if(rcdca < DCATrackCut) continue;
 
 
 			//Identify as K+//
-			vecTrackID_kp.push_back(nKPlus);
+			vecTrackID_kp.push_back(nPlus);
 			vecDCA_kp.push_back(rcdca);               
 			vecPt_kp.push_back(rcFourMom.Perp());
 			vecEta_kp.push_back(rcFourMom.Eta());
 			vecPhi_kp.push_back(rcFourMom.Phi());
 			vecPos_kp.push_back(rcPos);
-			vecType_kp.push_back(1);
+			if(id == 321)	vecType_kp.push_back(1);
+			if(id == 211)	vecType_kp.push_back(6);
+			if(id == 2212)	vecType_kp.push_back(6);
+
 			vecBottom_kp.push_back(1); 
 
+			if(id == 321) EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+			if(id == 211) EIDProb = EIDRejPi->Eval(rcFourMom.Perp());
+			if(id == 2212) EIDProb = EIDRejP->Eval(rcFourMom.Perp());
+			RANDOMID = 	((double)rand() / (double)(RAND_MAX));
 
-			nKPlus = nKPlus + 1;
+			if(RANDOMID > EIDProb) continue;  //Efficiency
+	
+			//Leakage into the e+//
+
+			vecTrackID_ep.push_back(nePlus);
+			vecDCA_ep.push_back(rcdca);               
+			vecPt_ep.push_back(rcFourMom.Perp());
+			vecEta_ep.push_back(rcFourMom.Eta());
+			vecPhi_ep.push_back(rcFourMom.Phi());
+			vecPos_ep.push_back(rcPos);
+			vecType_ep.push_back(5);
+			vecBottom_ep.push_back(1); 
+
+
+
 
 		}
 
@@ -1293,7 +1859,7 @@ void GenerateEvtGen(int & EventID){
 			if(rcdca < DCATrackCut) continue;
 			//	cout << "Pass 4" << endl;
 			RANDOMID = 	((double)rand() / (double)(RAND_MAX));
-			EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+//			EIDProb = EIDRejK->Eval(rcFourMom.Perp());
 			if(RANDOMID > EIDProb) continue;
 
 			//Identify as e-//
@@ -1312,38 +1878,85 @@ void GenerateEvtGen(int & EventID){
 			neMinus = neMinus + 1;
 		}
 
-		if(id == -321) {
+		if(id == -321|| id == -211 || id == -2212) {
 
 			float rcdca = dca(FourMom.Vect(), rcPosSig, vertex);
-			vecTrackID_kmGen.push_back(nKMinus);
+			vecTrackID_kmGen.push_back(nMinus);
 			vecDCA_kmGen.push_back(rcdca);               
 			vecPt_kmGen.push_back(FourMom.Perp());
 			vecEta_kmGen.push_back(FourMom.Eta());
 			vecPhi_kmGen.push_back(FourMom.Phi());
 			vecPos_kmGen.push_back(rcPosSig);
-			vecType_kmGen.push_back(1);
+			if(id == -321) vecType_kmGen.push_back(1);
+			if(id == -211)	vecType_kmGen.push_back(6);
+			if(id == -2212)	vecType_kmGen.push_back(6);
 			vecBottom_kmGen.push_back(1); 
-			
+	
 
-			rcFourMom = smearMom(FourMom,fKaonMomResolution);
-			rcPos = smearPosData(1, 0, 7, rcFourMom, rcPosSig);
+			//Leakage into the e-//
+
+			vecTrackID_emGen.push_back(neMinus);
+			vecDCA_emGen.push_back(rcdca);               
+			vecPt_emGen.push_back(rcFourMom.Perp());
+			vecEta_emGen.push_back(rcFourMom.Eta());
+			vecPhi_emGen.push_back(rcFourMom.Phi());
+			vecPos_emGen.push_back(rcPos);
+			vecType_emGen.push_back(5);
+			vecBottom_emGen.push_back(1); 
+
+
+			if(id == -321){
+				rcFourMom = smearMom(FourMom,fKaonMomResolution);
+				rcPos = smearPosData(1, 0, 7, rcFourMom, rcPosSig);
+			}
+			if(id == -211){
+				rcFourMom = smearMom(FourMom,fPionMomResolution);
+				rcPos = smearPosData(0, 0, 7, rcFourMom, rcPosSig);
+			}
+			if(id == -2212){
+				rcFourMom = smearMom(FourMom,fProtonMomResolution);
+				rcPos = smearPosData(2, 0, 7, rcFourMom, rcPosSig);
+			}
+
 			if (rcFourMom.Perp()<minPtCut) continue;
 			rcdca = dca(rcFourMom.Vect(), rcPos, vertex);
 			if(rcdca < DCATrackCut) continue;
 
 
 			//Identify as K-//
-			vecTrackID_km.push_back(nKMinus);
+			vecTrackID_km.push_back(nMinus);
 			vecDCA_km.push_back(rcdca);               
 			vecPt_km.push_back(rcFourMom.Perp());
 			vecEta_km.push_back(rcFourMom.Eta());
 			vecPhi_km.push_back(rcFourMom.Phi());
 			vecPos_km.push_back(rcPos);
-			vecType_km.push_back(1);
+			if(id == -321) vecType_km.push_back(1);
+			if(id == -211)	vecType_km.push_back(6);
+			if(id == -2212)	vecType_km.push_back(6);
+
 			vecBottom_km.push_back(1); 
 
 
-			nKMinus = nKMinus + 1;
+			if(id == -321) EIDProb = EIDRejK->Eval(rcFourMom.Perp());
+			if(id == -211) EIDProb = EIDRejPi->Eval(rcFourMom.Perp());
+			if(id == -2212) EIDProb = EIDRejP->Eval(rcFourMom.Perp());
+			RANDOMID = 	((double)rand() / (double)(RAND_MAX));
+
+			if(RANDOMID > EIDProb) continue;  //Efficiency
+	
+			//Leakage into the e-//
+
+			vecTrackID_em.push_back(neMinus);
+			vecDCA_em.push_back(rcdca);               
+			vecPt_em.push_back(rcFourMom.Perp());
+			vecEta_em.push_back(rcFourMom.Eta());
+			vecPhi_em.push_back(rcFourMom.Phi());
+			vecPos_em.push_back(rcPos);
+			vecType_em.push_back(5);
+			vecBottom_em.push_back(1); 
+
+			nMinus = nMinus + 1;
+			neMinus = neMinus + 1;
 
 		}
 
@@ -1865,14 +2478,24 @@ void init(){
 	if(UseSTAR){
 
 		fElectronMomResolution = new TF1("fElectronMomResolution","0.00332099 -0.000868694/x -2.04427e-05*x*x + 0.0015437 * x +  0.000544441/(x*x)",TrackPTMin,TrackPTMax);
+		fPionMomResolution = new TF1("fPionMomResolution","0.00332099 -0.000868694/x -2.04427e-05*x*x + 0.0015437 * x +  0.000544441/(x*x)",TrackPTMin,TrackPTMax);
 		fKaonMomResolution = new TF1("fKaonMomResolution","0.00271293 -0.000125306/x  -3.26199e-05*x*x + 0.00171111 * x +  0.000674163/(x*x)",TrackPTMin,TrackPTMax);
 		fProtonMomResolution = new TF1("fProtonMomResolution","0.00346318 -0.00152079/x -2.8538e-05*x*x + 0.00161474 * x +  0.00203283/(x*x)",TrackPTMin,TrackPTMax);
 
 	}
 
-	EIDRejKFunc = Form("(%f+%f*pow(x,%f)+%f*x)",krejpar0,krejpar1,krejpar2,krejpar3);
 
+	EIDRejPiFunc = Form("(%f+%f*pow(x,%f)+%f*x)",pirejpar0,pirejpar1,pirejpar2,pirejpar3);
+	EIDRejPi = new TF1("EIDRejPi",EIDRejPiFunc.Data(),EICMinPt,EICMaxPt);
+
+
+	EIDRejKFunc = Form("(%f+%f*pow(x,%f)+%f*x)",krejpar0,krejpar1,krejpar2,krejpar3);
 	EIDRejK = new TF1("EIDRejK",EIDRejKFunc.Data(),EICMinPt,EICMaxPt);
+
+	EIDRejPFunc = Form("(%f+%f*pow(x,%f)+%f*x)",prejpar0,prejpar1,prejpar2,prejpar3);
+	EIDRejP = new TF1("EIDRejP",EIDRejPFunc.Data(),EICMinPt,EICMaxPt);
+
+
 
 	cout << "DONE LOADING LIBRARIES!!!" << endl;
 
@@ -2082,6 +2705,7 @@ void init(){
 
 	InputSpectra = new TFile(SpectraFiles.Data());
 
+	hpiPtWg = (TH1F *) InputSpectra->Get("hpiPtWg");	
 	hePtWg = (TH1F *) InputSpectra->Get("hpiPtWg");
 	hkPtWg = (TH1F *) InputSpectra->Get("hkPtWg");
 	hpPtWg = (TH1F *) InputSpectra->Get("hpPtWg");
@@ -2092,9 +2716,42 @@ void init(){
 		c->cd();
 		c->SetLogy();
 	
+		EIDRejK->GetXaxis()->SetTitle("Electron p_{T} GeV/c");
+		EIDRejK->GetYaxis()->SetTitle("Inverse Rejection Factor");
+		EIDRejK->SetTitle("Electron - Hadron Inverse Rejection Factor vs p_{T}");
+		EIDRejK->GetXaxis()->CenterTitle();
+		EIDRejK->GetYaxis()->CenterTitle();
+		EIDRejK->GetYaxis()->SetTitleOffset(1.4);
+		EIDRejK->SetMinimum(0.0005);
+
+		EIDRejPi->SetLineColor(kBlack);
+		EIDRejK->SetLineColor(kRed);
+		EIDRejP->SetLineColor(kBlue);
+
+		EIDRejK->SetMinimum(0.00001);
+		
 
 		EIDRejK->Draw();
-		c->SaveAs("Plots/EICRejK.png");
+		EIDRejPi->Draw("SAME");
+		EIDRejP->Draw("SAME");
+
+
+		TLegend *legRej = new TLegend(0.36,0.60,0.75,0.85,NULL,"brNDC");
+		legRej->SetBorderSize(0);
+		legRej->SetTextSize(0.040);
+		legRej->SetTextFont(42);
+		legRej->SetFillStyle(0);
+		legRej->SetLineWidth(3);
+
+		legRej->AddEntry(EIDRejPi,"e - #pi","l");
+		legRej->AddEntry(EIDRejK,"e - K","l");
+		legRej->AddEntry(EIDRejP,"e - p","l");
+
+		legRej->Draw("SAME");
+
+
+
+		c->SaveAs("Plots/EICRejHadrons.png");
 
 		hePtWg->GetXaxis()->SetTitle("p_{T} (GeV/c)");
 		hePtWg->GetYaxis()->SetTitle("Counts");

@@ -31,6 +31,11 @@ void PostAna(){
 	TString infileGen = "AnalyzedFileGenAll.root";
 	TFile * finGen = new TFile(infileGen.Data());
 
+	TLatex *latE = new TLatex();
+	latE->SetNDC();
+	latE->SetTextSize(0.05);
+	latE->SetTextColor(kBlack);
+
 
 	const int NVar = 24;
 	TString XAxisName[NVar] = {"B_{s}^{0} (K^{+} K^{-} e^{+}  e^{-}) (GeV/c^{2})","DCA Daughters (#mu m)","SV to PV (Decay) Length (#mu m)","cos(#theta)","|m_{KK} - m_{#phi}| (GeV/c^2)","|m_{ee} - m_{J/#psi}}| (GeV/c^2)","K^{+} p_{T} (GeV/c)","K^{-} p_{T} (GeV/c)","K^{+} #eta","K^{-} #eta","K^{+} DCA (#mu m)","K^{-} DCA (#mu m)","e^{+} p_{T} (GeV/c)","e^{-} p_{T} (GeV/c)","e^{+} #eta","e^{-} #eta","e^{+} DCA (#mu m)","e^{-} DCA (#mu m)","B_{s}^{0} (K^{+} K^{-} e^{+}  e^{-}) (GeV/c^{2})","m_{KK}","m_{ee}","B_{s}^{0} Vertex X (#mu m)","B_{s}^{0} Vertex Y (#mu m)","B_{s}^{0} Vertex Z (#mu m)"};
@@ -55,7 +60,7 @@ void PostAna(){
 	c->cd();
 
 
-	
+
 	for(int i = 0; i < NVar; i++){
 
 
@@ -134,9 +139,12 @@ void PostAna(){
 		leg[i]->AddEntry(BsHisSig,"B_{s}^{0} Signal Decay","l");
 		leg[i]->AddEntry(BsHisSel,"Mass Window Selection Applied","l");
 		leg[i]->AddEntry(BsHisComb,"Random Background from PV","l");
-		leg[i]->AddEntry(BsHisDecay,"Inclusive B_{s}^{0} Decay","l");
+		leg[i]->AddEntry(BsHisDecay,"PYTHIA 8 pp #rightarrow b #bar{b} Decay","l");
 		
 		leg[i]->Draw("SAME");
+
+		latE->DrawLatex(0.42,0.87,"#it{#bf{RECO}}");
+
 
 		OutName = Form("PlotsInclusive/RECO/%s.png",SaveName[i].Data());
 
@@ -225,10 +233,12 @@ void PostAna(){
 		legGen[i]->AddEntry(BsHisSig,"B_{s}^{0} Signal Decay","l");
 		legGen[i]->AddEntry(BsHisSel,"Mass Window Selection Applied","l");
 		legGen[i]->AddEntry(BsHisComb,"Random Background from PV","l");
-		legGen[i]->AddEntry(BsHisDecay,"Inclusive B_{s}^{0} Decay","l");
+		legGen[i]->AddEntry(BsHisDecay,"PYTHIA 8 pp #rightarrow b #bar{b} Decay","l");
 			
 		legGen[i]->Draw("SAME");
 
+		latE->DrawLatex(0.42,0.87,"#it{#bf{GEN}}");
+		
 		OutName = Form("PlotsInclusive/Gen/%s.png",SaveName[i].Data());
 
 		c->SaveAs(OutName.Data());

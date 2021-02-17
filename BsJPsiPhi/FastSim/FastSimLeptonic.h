@@ -2,8 +2,9 @@
 
 #include <Pythia8/Pythia.h>
 	R__LOAD_LIBRARY(libPHPythia8.so)
-	R__LOAD_LIBRARY(EvtGen/lib/libEvtGen.so)
-	
+//	R__LOAD_LIBRARY(EvtGen/lib/libEvtGen.so)
+
+	R__LOAD_LIBRARY(libEvtGen.so)
 
 
 
@@ -73,9 +74,9 @@
 
 	//Electron ID Parameters
 	double RANDOMID;
-	double EIDProb;
+	double EIDProb = 0.90;
 	double EICMinPt = 0.0;
-	double EICMaxPt = 300.0;
+	double EICMaxPt = 20.0;
 
 
 	TF1 * EIDRejK;
@@ -84,6 +85,22 @@
 	float krejpar2 = -2.72674e+00;
 	float krejpar3 = 2.19957e-04;
 	TString EIDRejKFunc;
+
+
+	TF1 * EIDRejPi;
+	float pirejpar0 = -3.17086e-03;
+	float pirejpar1 = 2.02062e-01;
+	float pirejpar2 = -2.41365e+00;
+	float pirejpar3 = 5.81442e-04;
+	TString EIDRejPiFunc;
+
+	TF1 * EIDRejP;
+	float prejpar0 = -1.24742e-04;
+	float prejpar1 = 1.82736e-01;
+	float prejpar2 = -3.66287e+00;
+	float prejpar3 = 2.30891e-05;
+	TString EIDRejPFunc;
+
 
 	//
 	
@@ -124,20 +141,32 @@ int DrawInput = 0;
 int nPlus;
 int nMinus;
 
+int nePlusComb;
+int nePlusSig;
+int nePlusDecay;
+int nePlusGen;
 
 bool NoCut = true;
 bool doCut = false;
 
 int MaxPlus = 10;
 int MaxMinus = 10;
+
+int MaxProton = 2;
+
 double PassPre;
 
 
 int nePlus;
 int nKPlus;
+int nPiPlus;
+int nPPlus;
+
+
 int neMinus;
 int nKMinus;
-
+int nPiMinus;
+int nPMinus;
 
 
 Pythia8::Pythia pythia8;
@@ -268,10 +297,14 @@ double PI = 3.1415926538;
 
 double M_KAON_MINUS=0.493677;
 double M_ELECTRON_MINUS=0.000510998950;
+double M_PION_PLUS = 0.139568;
+double M_PROTON_PLUS = 0.938272088; 
+
 
 double M_KAON_PLUS=0.493677;
 double M_ELECTRON_PLUS=0.000510998950;
-
+double M_PION_MINUS = 0.139568;
+double M_PROTON_MINUS = 0.938272088; 
 
 float gpx;
 float gpy;

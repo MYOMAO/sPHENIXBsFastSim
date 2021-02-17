@@ -1,9 +1,10 @@
 
 
 #include <Pythia8/Pythia.h>
+
 	R__LOAD_LIBRARY(libPHPythia8.so)
-	R__LOAD_LIBRARY(EvtGen/lib/libEvtGen.so)
-	
+//	R__LOAD_LIBRARY(EvtGen/lib/libEvtGen.so)
+	R__LOAD_LIBRARY(libEvtGen.so)
 
 
 
@@ -54,6 +55,7 @@
 #include "EvtGen/include/EvtGenBase/EvtAbsRadCorr.hh"
 #include "EvtGen/include/EvtGenBase/EvtDecayBase.hh"
 #include "EvtGen/include/EvtGenExternal/EvtExternalGenList.hh"
+//#include "/cvmfs/sphenix.sdcc.bnl.gov/default/release/release_ana/ana/include/EvtGenExternal/EvtExternalGenList.hh"
 
 #include "PHEvtGenDecayer.h"
 #include "PHEvtGenDecayer.cxx"
@@ -64,12 +66,17 @@
 	//R__LOAD_LIBRARY(libHFMLTrigger.so)
 	using namespace std;
 
-	bool RunBackground = true;
-	bool RunSignal = false;
-	bool RunEVTGEN = true;
+	bool AllowGenPID = true;
+	bool RunUncorrBkgd = true;
+//	bool RunSignal = false;
+	bool RunEVTGEN = false;
+	bool RunCorrBkgd = false;
 
 	//PHPythia8 *pythia8 = NULL;
 
+	bool SaveSigGen = true;
+	bool SaveCombGen = false;
+	bool SaveDecayGen = false;
 
 
 	//StarPythia8 *pythia8 = NULL;
@@ -88,7 +95,11 @@
 	double PiKKMassWindow = 0.10;
 
 	double minPtCut = 0.0;
+	double minPtCutGen = 0.0;
+	
 	double etaCut = 1.1;
+	double etaCutGen = 10000;
+	double BetaCut = 1.1;
 
 	float ThetaCut = -1;
 	double DCACut = 200;
@@ -101,26 +112,50 @@
 	const Double_t ptEdgeDca[nPtBinsDca + 1] = {0 ,  0.1 , 0.5 , 0.6 , 0.7,  0.8 , 0.9 , 1.0 , 1.2 , 1.4 , 1.6 , 1.8 , 2. , 2.4 , 3.0 , 4. , 6., 50. };
 
 
+float EffWeightCounts;
 int DrawInput = 0;
 
 int nPlus;
 int nMinus;
-
+int nProtons;
 
 bool NoCut = true;
-bool doCut = false;
+int doCut = 4;
 
-int MaxPlus = 10;
-int MaxMinus = 10;
+double BsMassUp = 5.9;
+double BsMassDown = 4.9;
+
+
+int MaxPlus = 20;  //From STAR Reference: http://old.inspirehep.net/record/793126/files/Fig01_AuAuMult.png 
+int MaxMinus = 20;
+int BaseCharge = 80;
+
 double PassPre;
 
+int MaxProton = 10;
+int BaseProton = 30;
 
 int nPiPlus;
 int nKPlus;
+int nPPlus;
+
 int nPiMinus;
 int nKMinus;
+int nPMinus;
 
 
+int nPiPlusComb;
+int nPiPlusSig;
+int nPiPlusDecay;
+int nPiPlusGen;
+
+int PiPFromDs;
+
+double TrackEtaCut;
+
+
+double SmearSigmaR;
+double NSigmaDCA;
 
 Pythia8::Pythia pythia8;
 
@@ -130,6 +165,16 @@ float const pxlLayer1Thickness = 0.00486;
 const Int_t nParticles = 3;  //0--pi, 1--k, 2--p
 
 TH2F* h2Dca[nParticles][nPtBinsDca];    //0--pi, 1--k, 2--p
+TH1F* h2DcaXY[nParticles][nPtBinsDca];    //0--pi, 1--k, 2--p
+TH1F* h2DcaZ[nParticles][nPtBinsDca];    //0--pi, 1--k, 2--p
+
+double DCAXY[nParticles][nPtBinsDca];
+double DCAZ[nParticles][nPtBinsDca];
+double DCAR[nParticles][nPtBinsDca];
+
+
+TH2D * FONLL2DMap;
+
 
 int const nEtasDca = 1;
 float const EtaEdgeDca[nEtasDca + 1] = { -1.1, 1.1};
@@ -143,10 +188,18 @@ float BsMassPDG = 5.36684;
 
 TFile * outFile = new TFile("output.root","RECREATE");
 
-
-
 TTree * nt_sig = new TTree("BsDsKKPiPi","BsDsKKPiPi");
 
+TTree * nt_evt = new TTree("TrackStatTree","TrackStatTree");
+
+
+TLorentzVector * DsMom = new TLorentzVector;
+
+
+int Evt;
+int Multi;
+int nTrk;
+int TotalEvents;
 
 int PairNow = 0;
 
@@ -184,6 +237,12 @@ TF1 * fKaonMomResolution = new TF1("fKaonMomResolution","0.0175 + 0.0011666667 *
 TF1 * fPionMomResolution = new TF1("fPionMomResolution","0.0175 + 0.0011666667 * x",TrackPTMin,TrackPTMax);
 TF1 * fProtonMomResolution = new TF1("fProtonMomResolution","0.0175 + 0.0011666667 * x",TrackPTMin,TrackPTMax);
 
+TF1 * fTpcPi;
+TF1 * fTpcK;
+TF1 * fTpcP;
+
+
+double TrackEff;
 
 //TF1 * hkPtWg = new TF1("hkPtWg","x*x*TMath::Exp(-x)",0,20);
 //TF1 * hpiPtWg = new TF1("hpiPtWg","x*x*TMath::Exp(-x/2)",0,20);
@@ -194,6 +253,7 @@ TH1F * hpPtWg;
 
 TFile * fDca2D;
 TFile * InputSpectra;
+TFile * FONLLInput;
 
 //int MaxPion = 20;
 //int MaxKaon = 20;
@@ -249,9 +309,11 @@ double PI = 3.1415926538;
 
 double M_KAON_MINUS=0.493677;
 double M_PION_MINUS=0.13957018;
+double M_PROTON_MINUS = 0.938272088;
 
 double M_KAON_PLUS=0.493677;
 double M_PION_PLUS=0.13957018;
+double M_PROTON_PLUS = 0.938272088;
 
 
 float gpx;
